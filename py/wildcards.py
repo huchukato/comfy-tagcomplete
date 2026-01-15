@@ -10,7 +10,7 @@ from typing import List, Dict, Tuple, Optional, Any
 
 # -----------------------------------------------
 # 以下のフォルダからワイルドカードを取得する
-#   1. /wildacards
+#   1. custom_nodes/wildcards
 #   2. extra_model_pathsでwildcardsに設定されたディレクトリ
 #   3. ComfyUI-Impact-Pack/wildcards
 #   4. ComfyUI-Impact-Pack/impact-pack.iniで設定されたディレクトリ
@@ -20,7 +20,7 @@ def get_wildcard_dirs() -> List[str]:
     dirs = []
     
     # 1. comfy-simple-wildcards/wildcard
-    dirs.append(str(paths.root_dir / "wildcards"))
+    dirs.append(str(paths.custom_nodes_dir / "wildcards"))
 
     # 2. extra_model_paths.yaml で設定されたパス
     try:
