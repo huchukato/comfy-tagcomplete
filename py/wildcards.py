@@ -19,7 +19,7 @@ def get_wildcard_dirs() -> List[str]:
     """ワイルドカードファイルが格納されているディレクトリのリストを取得します。"""
     dirs = []
     
-    # 1. comfy-simple-wildcards/wildcard
+    # 1. custom_nodes/wildcards
     dirs.append(str(paths.custom_nodes_dir / "wildcards"))
 
     # 2. extra_model_paths.yaml で設定されたパス
@@ -30,10 +30,10 @@ def get_wildcard_dirs() -> List[str]:
         pass
     
     # 3. ComfyUI-Impact-Pack/wildcards
-    dirs.append(str(paths.custom_nodes_dir / "ComfyUI-Impact-Pack" / "wildcards"))
+    dirs.append(str(paths.custom_nodes_dir / "ComfyUI-impact-pack" / "wildcards"))
 
     # 4. ComfyUI-Impact-Pack/impact-pack.ini で設定されたパス
-    ini_file = paths.custom_nodes_dir / "ComfyUI-Impact-Pack" / "impact-pack.ini"
+    ini_file = paths.custom_nodes_dir / "ComfyUI-impact-pack" / "impact-pack.ini"
     try:
         config = configparser.ConfigParser()
         config.read(ini_file, encoding="utf-8")
