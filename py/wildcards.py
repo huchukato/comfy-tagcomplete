@@ -30,10 +30,10 @@ def get_wildcard_dirs() -> List[str]:
         pass
     
     # 3. ComfyUI-Impact-Pack/wildcards
-    dirs.append(str(paths.custom_nodes_dir / "ComfyUI-impact-pack" / "wildcards"))
+    dirs.append(str(paths.custom_nodes_dir / "ComfyUI-Impact-Pack" / "wildcards"))
 
     # 4. ComfyUI-Impact-Pack/impact-pack.ini で設定されたパス
-    ini_file = paths.custom_nodes_dir / "ComfyUI-impact-pack" / "impact-pack.ini"
+    ini_file = paths.custom_nodes_dir / "ComfyUI-Impact-Pack" / "impact-pack.ini"
     try:
         config = configparser.ConfigParser()
         config.read(ini_file, encoding="utf-8")
