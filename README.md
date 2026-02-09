@@ -1,19 +1,25 @@
 # ComfyUI-Ex-TagComplete
 
-[<img src="https://img.shields.io/badge/lang-English-red.svg?style=plastic" height="25" />](README.en.md)
-[<img src="https://img.shields.io/badge/言語-日本語-green.svg?style=plastic" height="25" />](README.md)
+[![ComfyUI](https://img.shields.io/badge/ComfyUI-Extension-blue?logo=comfyui&style=for-the-badge)](https://github.com/comfyanonymous/ComfyUI)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-1.0.0-orange?style=for-the-badge)](https://github.com/huchukato/comfy-tagcomplete/releases)
+[![Stars](https://img.shields.io/github/stars/huchukato/comfy-tagcomplete?style=for-the-badge&logo=github)](https://github.com/huchukato/comfy-tagcomplete)
+[![Issues](https://img.shields.io/github/issues/huchukato/comfy-tagcomplete?style=for-the-badge&logo=github)](https://github.com/huchukato/comfy-tagcomplete/issues)
+
+[<img src="https://img.shields.io/badge/lang-English-red.svg?style=plastic" height="25" />](README.md)
+[<img src="https://img.shields.io/badge/lang-Italiano-blue.svg?style=plastic" height="25" />](README.it.md)
 
 ![capture](https://files.catbox.moe/fv292m.webp)
 
-この拡張機能は[ComfyUI-Custom-Scripts](https://github.com/pythongosssss/ComfyUI-Custom-Scripts)を参考にしています。
+This extension is based on [ComfyUI-Custom-Scripts](https://github.com/pythongosssss/ComfyUI-Custom-Scripts).
 
-また、tagsフォルダ内の
+Also, the following files in the tags folder:
 
 - danbooru.csv
 - danbooru_e621_merged.csv
 - extra-quality-tags.csv
 
-は[a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete)よりお借りしました。
+are borrowed from [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete).
 
 ## Install
 ```
@@ -25,61 +31,59 @@ git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
 ![settings](https://files.catbox.moe/0ai9mj.png)
 
 - `Enable`
-  - 機能の有効化
+  - Enable the feature
 - `Main Tags file`
-  - メインタグのcsvファイル
-  - tagsフォルダ内の **extraで始まるcsv以外** が対象
+  - Main tags CSV file
+  - Targets **all CSV files except those starting with 'extra'** in the tags folder
 - `Extra Tags file`
-  - 追加タグのcsvファイル
-  - tagsフォルダ内の **extraで始まるcsvのみ** が対象
+  - Additional tags CSV file
+  - Targets **only CSV files starting with 'extra'** in the tags folder
 - `Translate file` ⭐new
-  - 翻訳ファイルを設定します
+  - Set a translation file
 - `Delimiter`
-  - タグの区切り文字
-  - カンマ(,) ピリオド(.) none(なし) から選択
+  - Tag separator character
+  - Choose from comma (,), period (.), or none
 - `Add 'Space' after separator`
-  - 区切り文字の後に空白を追加する
+  - Add a space after the separator
 - `Insert Tag on Tab key`
-  - Tab キーで挿入する
+  - Insert tag with Tab key
 - `Insert Tag on Enter key`
-  - Enter キーで挿入する
+  - Insert tag with Enter key
 - `Max Suggestions to Display`
-  - タグ候補の表示数
-  - 0で全て表示する~~が重くなる(めちゃくちゃ重い)~~
+  - Number of tag suggestions to display
+  - 0 displays all ~~but becomes heavy (extremely heavy)~~
 - `Add Wiki Link Button`
-  - タグ候補左にwiki (danbooru / e621) へのリンクボタンを追加する
+  - Add wiki (danbooru / e621) link button to the left of tag suggestions
 - `Replace '_' to 'Space'`
-  - タグの _ を空白に置き換える
+  - Replace underscores in tags with spaces
 - `Completion delay(ms)`
-  - 入力してからタグ候補を表示するまでの時間
+  - Time before displaying tag suggestions after input
 - `Enable Embeddings`
-  - Embeddingファイルも候補に含める
+  - Include Embedding files in suggestions
 - `Enable LoRAs`
-  - LoRAファイルも候補に含める
-- `Enable Wildcards`⭐new
-  - ワイルドカードも候補に含める
+  - Include LoRA files in suggestions
+- `Enable Wildcards` ⭐new
+  - Include wildcards in suggestions
 - `Restrict Alias`
-  - ONにすると、Alias(1girls => 1girlなど)が完全一致の場合のみ表示される
-  - 例えば、1girlsまで入力しないと「1girls => 1girl」のAliasは表示されない
+  - When ON, Aliases (like 1girls => 1girl) are only displayed on exact match
+  - For example, the alias "1girls => 1girl" will only be displayed when you type up to "1girls"
 
-
-## カテゴリフィルタ
+## Category Filter
 ![filter](https://files.catbox.moe/bir330.png)
 
-カテゴリを指定して検索できます。  
-`--〇〇` と入力してカテゴリを指定します。  
-使用できるカテゴリは [カテゴリマップ](category_map.csv) にあります。  
-- 例
+You can search by specifying categories.  
+Enter `--○○` to specify a category.  
+Available categories are listed in [Category Map](category_map.csv).  
+- Example
   - `--character fate`
-    - `fate` の検索結果のうち、カテゴリが `character` のもののみ表示されます。
+    - Displays only results with category `character` from the `fate` search results.
 
-
-## プレフィックス
+## Prefix
 ![prefix](https://files.catbox.moe/uddq2d.png)
 
-プレフィックスを設定して検索できます。  
-`++〇〇` と入力してプレフィックスを設定します。  
-プレフィックスは複数設定できます。  
-- 例
+You can search with prefix settings.  
+Enter `++○○` to set a prefix.  
+Multiple prefixes can be set.  
+- Example
   - `++pink skirt`
-    - skirt で検索し、`pleated skirt` を選んだ場合、結果は `pink pleated skirt` となります。
+    - When searching for "skirt" and selecting `pleated skirt`, the result will be `pink pleated skirt`.
