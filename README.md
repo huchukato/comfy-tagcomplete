@@ -24,7 +24,7 @@ are borrowed from [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1
 ## Install
 ```
 cd ComfyUI\custom_nodes
-git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
+git clone https://github.com/huchukato/comfy-tagcomplete.git
 ```
 
 ## Settings
