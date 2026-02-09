@@ -18,7 +18,7 @@ sono presi in prestito da [a1111-sd-webui-tagcomplete](https://github.com/Domini
 ## Installazione
 ```
 cd ComfyUI\custom_nodes
-git clone https://github.com/jupo-ai/comfy-ex-tagcomplete.git
+git clone https://github.com/huchukato/comfy-tagcomplete.git
 ```
 
 ## Impostazioni
