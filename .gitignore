@@ -176,3 +176,6 @@ cython_debug/
 # tags dir
 tags/
 translate/
+
+# macOS
+.DS_Store
