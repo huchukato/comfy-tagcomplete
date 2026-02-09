@@ -146,7 +146,6 @@ class WildcardLoader:
                 file_path = root_path / file
                 
                 if file_path.suffix == ".txt":
-                    key = cls._key_normalize(file_path.stem)
                     rel_path = file_path.relative_to(dir_path)
                     key = cls._key_normalize(str(rel_path.with_suffix('')))
                     
