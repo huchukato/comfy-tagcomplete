@@ -1,4 +1,4 @@
-# ComfyUI-Ex-TagComplete
+# ComfyUI-TagComplete
 
 [<img src="https://img.shields.io/badge/lang-Italiano-red.svg?style=plastic" height="25" />](README.it.md)
 [<img src="https://img.shields.io/badge/lang-English-blue.svg?style=plastic" height="25" />](README.md)
