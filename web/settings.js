@@ -160,7 +160,7 @@ export const settings = {
         name: "Enable Wildcards", 
         id: mk_name("enableWildcards"), 
         type: "boolean", 
-        defaultValue: false, 
+        defaultValue: true, 
         onChange: async (value) => {
             await api_post("load_wildcards", { value: value });
         }, 

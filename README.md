@@ -1,4 +1,4 @@
-# ComfyUI-Ex-TagComplete
+# ComfyUI-TagComplete
 
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-Extension-blue?logo=comfyui&style=for-the-badge)](https://github.com/comfyanonymous/ComfyUI)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
