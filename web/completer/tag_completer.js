@@ -302,8 +302,8 @@ export class TagCompleter {
 
     // --- wildcard options ---
     showWildcardOptions(wildcardResult, originalSearchInfo) {
-        // Dividi le opzioni della wildcard
-        const options = wildcardResult.wildcardValue.split(',').map(opt => opt.trim()).filter(opt => opt);
+        // Dividi le opzioni della wildcard per riga (ogni riga è un'opzione completa)
+        const options = wildcardResult.wildcardValue.split('\n').map(opt => opt.trim()).filter(opt => opt);
         
         if (options.length === 0) return;
 
