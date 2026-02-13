@@ -207,7 +207,8 @@ export class DropdownRenderer {
     // ------------------------------------------
     createDropdownItem(result, searchInfo, parts, onItemClick) {
         const item = $el("div.jupo-tagcomplete-item", {
-            onclick: (e) => onItemClick(e, result, searchInfo), 
+            onclick: (e) => onItemClick(e, result, searchInfo),
+            "data-category": result.categoryName || null
         }, parts);
 
         // wildcardの場合、アイテムにタイトルをつける

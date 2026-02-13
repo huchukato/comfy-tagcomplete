@@ -50,7 +50,7 @@
 }
 
 /* --- Stili per opzioni wildcard lunghe --- */
-.huchukato-tagcomplete-item[data-category="Wildcard"] {
+.jupo-tagcomplete-item[data-category="Wildcard"] {
     max-width: 600px;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -58,7 +58,7 @@
     line-height: 1.4;
 }
 
-.huchukato-tagcomplete-item[data-category="Wildcard"] .huchukato-tagcomplete-itemText {
+.jupo-tagcomplete-item[data-category="Wildcard"] .jupo-tagcomplete-itemText {
     max-width: 500px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -67,7 +67,33 @@
     -webkit-box-orient: vertical;
 }
 
-.huchukato-tagcomplete-item[data-category="Wildcard"]:hover .huchukato-tagcomplete-itemText {
+.jupo-tagcomplete-item[data-category="Wildcard"]:hover .jupo-tagcomplete-itemText {
+    -webkit-line-clamp: unset;
+    max-height: none;
+    overflow: visible;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+/* Alternative: target by category class */
+.jupo-tagcomplete-pill-category-wildcard {
+    max-width: 600px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    line-height: 1.4;
+}
+
+.jupo-tagcomplete-pill-category-wildcard .jupo-tagcomplete-itemText {
+    max-width: 500px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.jupo-tagcomplete-pill-category-wildcard:hover .jupo-tagcomplete-itemText {
     -webkit-line-clamp: unset;
     max-height: none;
     overflow: visible;
