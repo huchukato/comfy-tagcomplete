@@ -385,7 +385,7 @@ class TagDataManager:
                 "postCount": None, 
                 "categoryName": "Wildcard", 
                 "site": None, 
-                "wildcardValue": ",".join(value)
+                "wildcardValue": "\n".join(value)  # Usa \n come separatore invece di virgole
             })
         
         return data
