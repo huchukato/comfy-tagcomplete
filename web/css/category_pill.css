@@ -42,5 +42,9 @@
 }
 
 .jupo-tagcomplete-pill-category-wildcard {
-    --pill-bg: rgba(200, 150, 255, 0.6);
+    background: rgba(200, 150, 255, 0.6);
+}
+
+.jupo-tagcomplete-pill-category-wildcard-option {
+    background: rgba(150, 200, 255, 0.6);
 }

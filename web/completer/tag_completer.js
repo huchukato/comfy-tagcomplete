@@ -207,6 +207,12 @@ export class TagCompleter {
     handleItemClick(e, result, searchInfo) {
         if (e.target.classList.contains("jupo-tagcomplete-wikiLink")) return;
 
+        // Se è una wildcard, mostra le opzioni senza inserire nulla
+        if (result.categoryName === "Wildcard" && result.wildcardValue) {
+            this.showWildcardOptions(result, searchInfo);
+            return;
+        }
+
         this.element.focus();
 
         if (this.termCursorPostion) {
@@ -221,6 +227,30 @@ export class TagCompleter {
         this.helper.insertAtCursor(insertValue, replaceLength);
 
         setTimeout(() => this.dropdownController.hide(), 150);
+    }
+
+    // --- wildcard options ---
+    showWildcardOptions(wildcardResult, originalSearchInfo) {
+        // Dividi le opzioni della wildcard
+        const options = wildcardResult.wildcardValue.split(',').map(opt => opt.trim()).filter(opt => opt);
+        
+        if (options.length === 0) return;
+
+        // Crea i risultati per le opzioni
+        const optionResults = options.map(option => ({
+            term: option,
+            text: option,
+            value: option,
+            category: null,
+            postCount: "Wildcard option",
+            categoryName: "Wildcard",
+            site: null,
+            translate: null,
+            wildcardValue: null
+        }));
+
+        // Mostra le opzioni
+        this.dropdownController.showResults(optionResults, originalSearchInfo);
     }
 
 
