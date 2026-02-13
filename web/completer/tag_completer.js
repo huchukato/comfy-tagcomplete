@@ -231,8 +231,12 @@ export class TagCompleter {
 
     // --- wildcard options ---
     showWildcardOptions(wildcardResult, originalSearchInfo) {
+        console.log("showWildcardOptions called with:", wildcardResult);
+        
         // Dividi le opzioni della wildcard
         const options = wildcardResult.wildcardValue.split(',').map(opt => opt.trim()).filter(opt => opt);
+        
+        console.log("Wildcard options:", options);
         
         if (options.length === 0) return;
 
@@ -249,8 +253,10 @@ export class TagCompleter {
             wildcardValue: null
         }));
 
+        console.log("Option results:", optionResults);
+
         // Mostra le opzioni
-        this.dropdownController.showResults(optionResults, originalSearchInfo);
+        this.dropdownController.showDropdown(optionResults, originalSearchInfo);
     }
 
 
