@@ -88,7 +88,17 @@ export class TagCompleter {
             onNavigateUp: () => this.dropdownController.navigateUp(), 
             onNavigateDown: () => this.dropdownController.navigateDown(), 
             onInsertItem: () => this.insertSelectedItem(), 
-            onHide: () => this.dropdownController.hide(), 
+            onHide: () => {
+                if (this.isInWildcardMode) {
+                    // ESC: torna alla wildcard inserita
+                    this.isInWildcardMode = false;
+                    this.originalWildcardResult = null;
+                    this.originalSearchInfo = null;
+                    this.dropdownController.hide();
+                } else {
+                    this.dropdownController.hide();
+                }
+            }, 
             onPageUp: () => this.handlePageUp(), 
             onPageDown: () => this.handlePageDown(), 
         });
@@ -212,8 +222,8 @@ export class TagCompleter {
     handleItemClick(e, result, searchInfo) {
         if (e.target.classList.contains("jupo-tagcomplete-wikiLink")) return;
 
-        // Se siamo in modalità wildcard, inserisci l'opzione
-        if (this.isInWildcardMode) {
+        // Se è una wildcard, inserisci la wildcard completa
+        if (result.categoryName === "Wildcard" && result.wildcardValue) {
             this.element.focus();
 
             if (this.termCursorPostion) {
@@ -222,11 +232,49 @@ export class TagCompleter {
             }
 
             const afterCursor = this.helper.getAfterCursor();
-            const insertValue = this.textProcessor.createInsertValue(result, this.originalSearchInfo, afterCursor);
-            const replaceLength = this.textProcessor.getReplaceLength(this.originalSearchInfo);
+            const insertValue = this.textProcessor.createInsertValue(result, searchInfo, afterCursor);
+            const replaceLength = this.textProcessor.getReplaceLength(searchInfo);
 
             this.helper.insertAtCursor(insertValue, replaceLength);
-            setTimeout(() => this.dropdownController.hide(), 150);
+            
+            // Imposta il flag per mostrare le opzioni dopo l'inserimento
+            setTimeout(() => this.showWildcardOptions(result, searchInfo), 100);
+            return;
+        }
+
+        // Se siamo in modalità wildcard opzioni, inserisci l'opzione sostituendo la wildcard
+        if (this.isInWildcardMode) {
+            this.element.focus();
+
+            if (this.termCursorPostion) {
+                this.element.selectionStart = this.termCursorPostion.start;
+                this.element.selectionEnd = this.termCursorPostion.end;
+            }
+
+            // Trova la wildcard nel testo e sostituiscila con l'opzione
+            const beforeCursor = this.helper.getBeforeCursor();
+            const afterCursor = this.helper.getAfterCursor();
+            
+            // Cerca la wildcard che abbiamo appena inserito
+            const wildcardMatch = beforeCursor.match(/__([^_]+)__/);
+            if (wildcardMatch) {
+                const wildcardText = wildcardMatch[0];
+                const startPos = beforeCursor.lastIndexOf(wildcardText);
+                const endPos = startPos + wildcardText.length;
+                
+                this.element.selectionStart = startPos;
+                this.element.selectionEnd = endPos;
+                
+                // Inserisci l'opzione
+                this.helper.insertAtCursor(result.value, wildcardText.length);
+                setTimeout(() => this.dropdownController.hide(), 150);
+            } else {
+                // Fallback: inserisci normalmente
+                const insertValue = this.textProcessor.createInsertValue(result, this.originalSearchInfo, afterCursor);
+                const replaceLength = this.textProcessor.getReplaceLength(this.originalSearchInfo);
+                this.helper.insertAtCursor(insertValue, replaceLength);
+                setTimeout(() => this.dropdownController.hide(), 150);
+            }
             
             // Resetta la modalità wildcard
             this.isInWildcardMode = false;
@@ -235,12 +283,7 @@ export class TagCompleter {
             return;
         }
 
-        // Se è una wildcard, mostra le opzioni senza inserire nulla
-        if (result.categoryName === "Wildcard" && result.wildcardValue) {
-            this.showWildcardOptions(result, searchInfo);
-            return;
-        }
-
+        // Comportamento normale per tag normali
         this.element.focus();
 
         if (this.termCursorPostion) {
@@ -359,7 +402,7 @@ export class TagCompleter {
         const selectedItem = this.dropdownController.getSelectedItem();
         if (!selectedItem) return;
 
-        // Se siamo in modalità wildcard, gestiamo direttamente l'inserimento
+        // Se siamo in modalità wildcard opzioni, gestiamo direttamente l'inserimento
         if (this.isInWildcardMode) {
             const result = this.dropdownController.getCurrentResults()[this.dropdownController.getCurrentIndex()];
             if (result) {
@@ -370,17 +413,35 @@ export class TagCompleter {
                     this.element.selectionEnd = this.termCursorPostion.end;
                 }
 
+                // Trova la wildcard nel testo e sostituiscila con l'opzione
+                const beforeCursor = this.helper.getBeforeCursor();
                 const afterCursor = this.helper.getAfterCursor();
-                const insertValue = this.textProcessor.createInsertValue(result, this.originalSearchInfo, afterCursor);
-                const replaceLength = this.textProcessor.getReplaceLength(this.originalSearchInfo);
-
-                this.helper.insertAtCursor(insertValue, replaceLength);
-                setTimeout(() => this.dropdownController.hide(), 150);
                 
-                // Resetta la modalità wildcard
-                this.isInWildcardMode = false;
-                this.originalWildcardResult = null;
-                this.originalSearchInfo = null;
+                // Cerca la wildcard che abbiamo appena inserito
+                const wildcardMatch = beforeCursor.match(/__([^_]+)__/);
+                if (wildcardMatch) {
+                    const wildcardText = wildcardMatch[0];
+                    const startPos = beforeCursor.lastIndexOf(wildcardText);
+                    const endPos = startPos + wildcardText.length;
+                    
+                    this.element.selectionStart = startPos;
+                    this.element.selectionEnd = endPos;
+                    
+                    // Inserisci l'opzione
+                    this.helper.insertAtCursor(result.value, wildcardText.length);
+                    setTimeout(() => this.dropdownController.hide(), 150);
+                    
+                    // Resetta la modalità wildcard
+                    this.isInWildcardMode = false;
+                    this.originalWildcardResult = null;
+                    this.originalSearchInfo = null;
+                } else {
+                    // Fallback: inserisci normalmente
+                    const insertValue = this.textProcessor.createInsertValue(result, this.originalSearchInfo, afterCursor);
+                    const replaceLength = this.textProcessor.getReplaceLength(this.originalSearchInfo);
+                    this.helper.insertAtCursor(insertValue, replaceLength);
+                    setTimeout(() => this.dropdownController.hide(), 150);
+                }
             }
         } else {
             // Comportamento normale per non-wildcard
