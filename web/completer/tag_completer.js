@@ -240,10 +240,16 @@ export class TagCompleter {
         
         if (options.length === 0) return;
 
+        // Limita il numero di opzioni per evitare troppe risultati
+        const maxOptions = 30;
+        const limitedOptions = options.slice(0, maxOptions);
+        
+        console.log("Limited options:", limitedOptions.length, "of", options.length);
+
         // Crea i risultati per le opzioni
-        const optionResults = options.map(option => ({
+        const optionResults = limitedOptions.map((option, index) => ({
             term: option,
-            text: option,
+            text: option + (options.length > maxOptions && index === maxOptions - 1 ? ` (+${options.length - maxOptions} more)` : ''),
             value: option,
             category: null,
             postCount: "Wildcard option",
