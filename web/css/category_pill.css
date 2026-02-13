@@ -48,3 +48,29 @@
 .jupo-tagcomplete-pill-category-wildcard-option {
     background: rgba(150, 200, 255, 0.6);
 }
+
+/* --- Stili per opzioni wildcard lunghe --- */
+.huchukato-tagcomplete-item[data-category="Wildcard"] {
+    max-width: 600px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    line-height: 1.4;
+}
+
+.huchukato-tagcomplete-item[data-category="Wildcard"] .huchukato-tagcomplete-itemText {
+    max-width: 500px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.huchukato-tagcomplete-item[data-category="Wildcard"]:hover .huchukato-tagcomplete-itemText {
+    -webkit-line-clamp: unset;
+    max-height: none;
+    overflow: visible;
+    white-space: normal;
+    word-wrap: break-word;
+}
