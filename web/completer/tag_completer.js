@@ -256,7 +256,7 @@ export class TagCompleter {
             const afterCursor = this.helper.getAfterCursor();
             
             // Cerca la wildcard che abbiamo appena inserito
-            const wildcardMatch = beforeCursor.match(/__([^_]+)__/);
+            const wildcardMatch = beforeCursor.match(/__(.+?)__/);
             if (wildcardMatch) {
                 const wildcardText = wildcardMatch[0];
                 const startPos = beforeCursor.lastIndexOf(wildcardText);
