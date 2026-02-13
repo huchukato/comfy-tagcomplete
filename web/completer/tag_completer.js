@@ -237,6 +237,12 @@ export class TagCompleter {
 
             this.helper.insertAtCursor(insertValue, replaceLength);
             
+            // Aggiorna la posizione del cursore dopo l'inserimento della wildcard
+            this.termCursorPostion = {
+                start: this.element.selectionStart - insertValue.length,
+                end: this.element.selectionStart
+            };
+            
             // Mostra le opzioni dopo un breve ritardo per assicurarsi che il dropdown sia visibile
             setTimeout(() => this.showWildcardOptions(result, searchInfo), 50);
             return;
