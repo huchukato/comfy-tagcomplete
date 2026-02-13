@@ -64,6 +64,11 @@ export class TagCompleter {
         this.setupKeyboardHandlers();
         this.setupEventListeners();
         this.updateDebouncedFunction();
+        
+        // Inizializza le variabili per il modo wildcard
+        this.isInWildcardMode = false;
+        this.originalWildcardResult = null;
+        this.originalSearchInfo = null;
     }
 
     // --- コンポーネントを初期化 ---
@@ -207,6 +212,29 @@ export class TagCompleter {
     handleItemClick(e, result, searchInfo) {
         if (e.target.classList.contains("jupo-tagcomplete-wikiLink")) return;
 
+        // Se siamo in modalità wildcard, inserisci l'opzione
+        if (this.isInWildcardMode) {
+            this.element.focus();
+
+            if (this.termCursorPostion) {
+                this.element.selectionStart = this.termCursorPostion.start;
+                this.element.selectionEnd = this.termCursorPostion.end;
+            }
+
+            const afterCursor = this.helper.getAfterCursor();
+            const insertValue = this.textProcessor.createInsertValue(result, this.originalSearchInfo, afterCursor);
+            const replaceLength = this.textProcessor.getReplaceLength(this.originalSearchInfo);
+
+            this.helper.insertAtCursor(insertValue, replaceLength);
+            setTimeout(() => this.dropdownController.hide(), 150);
+            
+            // Resetta la modalità wildcard
+            this.isInWildcardMode = false;
+            this.originalWildcardResult = null;
+            this.originalSearchInfo = null;
+            return;
+        }
+
         // Se è una wildcard, mostra le opzioni senza inserire nulla
         if (result.categoryName === "Wildcard" && result.wildcardValue) {
             this.showWildcardOptions(result, searchInfo);
@@ -263,6 +291,11 @@ export class TagCompleter {
 
         // Mostra le opzioni
         this.dropdownController.showDropdown(optionResults, originalSearchInfo);
+        
+        // Imposta la modalità wildcard
+        this.isInWildcardMode = true;
+        this.originalWildcardResult = wildcardResult;
+        this.originalSearchInfo = originalSearchInfo;
     }
 
 
@@ -318,6 +351,40 @@ export class TagCompleter {
             this.dropdownController.hide();
         } finally {
             this.searchEngine.setUpdating(false);
+        }
+    }
+
+    // --- 選択中のアイテムを挿入 ---
+    insertSelectedItem() {
+        const selectedItem = this.dropdownController.getSelectedItem();
+        if (!selectedItem) return;
+
+        // Se siamo in modalità wildcard, gestiamo direttamente l'inserimento
+        if (this.isInWildcardMode) {
+            const result = this.dropdownController.getCurrentResults()[this.dropdownController.getCurrentIndex()];
+            if (result) {
+                this.element.focus();
+
+                if (this.termCursorPostion) {
+                    this.element.selectionStart = this.termCursorPostion.start;
+                    this.element.selectionEnd = this.termCursorPostion.end;
+                }
+
+                const afterCursor = this.helper.getAfterCursor();
+                const insertValue = this.textProcessor.createInsertValue(result, this.originalSearchInfo, afterCursor);
+                const replaceLength = this.textProcessor.getReplaceLength(this.originalSearchInfo);
+
+                this.helper.insertAtCursor(insertValue, replaceLength);
+                setTimeout(() => this.dropdownController.hide(), 150);
+                
+                // Resetta la modalità wildcard
+                this.isInWildcardMode = false;
+                this.originalWildcardResult = null;
+                this.originalSearchInfo = null;
+            }
+        } else {
+            // Comportamento normale per non-wildcard
+            selectedItem.click();
         }
     }
 
