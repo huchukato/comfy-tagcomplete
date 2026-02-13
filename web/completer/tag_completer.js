@@ -237,12 +237,6 @@ export class TagCompleter {
 
             this.helper.insertAtCursor(insertValue, replaceLength);
             
-            // Aggiorna la posizione del cursore dopo l'inserimento della wildcard
-            this.termCursorPostion = {
-                start: this.element.selectionStart - insertValue.length,
-                end: this.element.selectionStart
-            };
-            
             // Mostra le opzioni dopo un breve ritardo per assicurarsi che il dropdown sia visibile
             setTimeout(() => this.showWildcardOptions(result, searchInfo), 50);
             return;
@@ -252,40 +246,46 @@ export class TagCompleter {
         if (this.isInWildcardMode) {
             this.element.focus();
 
-            if (this.termCursorPostion) {
-                this.element.selectionStart = this.termCursorPostion.start;
-                this.element.selectionEnd = this.termCursorPostion.end;
-            }
-
-            // Trova la wildcard nel testo e sostituiscila con l'opzione
-            const beforeCursor = this.helper.getBeforeCursor();
-            const afterCursor = this.helper.getAfterCursor();
+            // Cerca la wildcard nell'intero testo del campo
+            const fullText = this.element.value;
+            const cursorPos = this.element.selectionStart;
             
-            // Cerca la wildcard che abbiamo appena inserito
-            const wildcardMatch = beforeCursor.match(/__(.+?)__/);
-            if (wildcardMatch) {
-                const wildcardText = wildcardMatch[0];
-                const startPos = beforeCursor.lastIndexOf(wildcardText);
-                const endPos = startPos + wildcardText.length;
+            // Cerca la wildcard più vicina al cursore
+            const wildcardRegex = /__(.+?)__/g;
+            let match;
+            let closestMatch = null;
+            let closestDistance = Infinity;
+            
+            while ((match = wildcardRegex.exec(fullText)) !== null) {
+                const matchStart = match.index;
+                const matchEnd = matchStart + match[0].length;
+                const distance = Math.abs(cursorPos - matchEnd);
                 
-                this.element.selectionStart = startPos;
-                this.element.selectionEnd = endPos;
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestMatch = {
+                        text: match[0],
+                        start: matchStart,
+                        end: matchEnd
+                    };
+                }
+            }
+            
+            if (closestMatch) {
+                // Seleziona la wildcard e sostituiscila
+                this.element.selectionStart = closestMatch.start;
+                this.element.selectionEnd = closestMatch.end;
                 
                 // Inserisci l'opzione
-                this.helper.insertAtCursor(result.value, wildcardText.length);
-                setTimeout(() => this.dropdownController.hide(), 150);
-            } else {
-                // Fallback: inserisci normalmente
-                const insertValue = this.textProcessor.createInsertValue(result, this.originalSearchInfo, afterCursor);
-                const replaceLength = this.textProcessor.getReplaceLength(this.originalSearchInfo);
-                this.helper.insertAtCursor(insertValue, replaceLength);
+                this.helper.insertAtCursor(result.value, closestMatch.text.length);
+                
+                // Resetta la modalità wildcard
+                this.isInWildcardMode = false;
+                this.originalWildcardResult = null;
+                this.originalSearchInfo = null;
+                
                 setTimeout(() => this.dropdownController.hide(), 150);
             }
-            
-            // Resetta la modalità wildcard
-            this.isInWildcardMode = false;
-            this.originalWildcardResult = null;
-            this.originalSearchInfo = null;
             return;
         }
 
