@@ -289,13 +289,13 @@ class TagDataManager:
         data = []
 
         for row in rows:
-            if len(row) < 2:
+            if len(row) < 4:
                 continue
             
             tag = row[0]
-            postCount = row[1] if len(row) > 1 else None
-            category = row[2] if len(row) > 2 else None
-            aliasesStr = row[3] if len(row) > 3 else None
+            category = row[1]
+            postCount = row[2]
+            aliasesStr = row[3]
             
             if not tag:
                 continue # 空行や不正行をスキップ
