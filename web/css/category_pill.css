@@ -50,53 +50,36 @@
 }
 
 /* --- Stili per opzioni wildcard lunghe --- */
-.jupo-tagcomplete-item[data-category="Wildcard"] {
-    max-width: 600px;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    white-space: normal;
-    line-height: 1.4;
+.jupo-tagcomplete-item {
+    max-width: 600px !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+    line-height: 1.4 !important;
 }
 
-.jupo-tagcomplete-item[data-category="Wildcard"] .jupo-tagcomplete-itemText {
-    max-width: 500px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
+.jupo-tagcomplete-itemText {
+    max-width: 500px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
 }
 
-.jupo-tagcomplete-item[data-category="Wildcard"]:hover .jupo-tagcomplete-itemText {
-    -webkit-line-clamp: unset;
-    max-height: none;
-    overflow: visible;
-    white-space: normal;
-    word-wrap: break-word;
+.jupo-tagcomplete-item:hover .jupo-tagcomplete-itemText {
+    -webkit-line-clamp: unset !important;
+    max-height: none !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
 }
 
-/* Alternative: target by category class */
+/* Stili specifici per wildcard */
 .jupo-tagcomplete-pill-category-wildcard {
-    max-width: 600px;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    white-space: normal;
-    line-height: 1.4;
-}
-
-.jupo-tagcomplete-pill-category-wildcard .jupo-tagcomplete-itemText {
-    max-width: 500px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-}
-
-.jupo-tagcomplete-pill-category-wildcard:hover .jupo-tagcomplete-itemText {
-    -webkit-line-clamp: unset;
-    max-height: none;
-    overflow: visible;
-    white-space: normal;
-    word-wrap: break-word;
+    max-width: 600px !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+    line-height: 1.4 !important;
 }
