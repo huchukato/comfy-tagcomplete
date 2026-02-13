@@ -10,6 +10,7 @@ from typing import List, Dict, Tuple, Optional, Any
 
 # -----------------------------------------------
 # 以下のフォルダからワイルドカードを取得する
+#   0. wildcards (del nostro repository)
 #   1. custom_nodes/wildcards
 #   2. extra_model_pathsでwildcardsに設定されたディレクトリ
 #   3. ComfyUI-Impact-Pack/wildcards
@@ -19,6 +20,9 @@ def get_wildcard_dirs() -> List[str]:
     """ワイルドカードファイルが格納されているディレクトリのリストを取得します。"""
     dirs = []
     
+    # 0. wildcards del nostro repository (priorità alta)
+    dirs.append(str(paths.wildcards_dir))
+
     # 1. custom_nodes/wildcards
     dirs.append(str(paths.custom_nodes_dir / "wildcards"))
 
