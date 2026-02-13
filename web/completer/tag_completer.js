@@ -237,8 +237,8 @@ export class TagCompleter {
 
             this.helper.insertAtCursor(insertValue, replaceLength);
             
-            // Imposta il flag per mostrare le opzioni dopo l'inserimento
-            setTimeout(() => this.showWildcardOptions(result, searchInfo), 100);
+            // Mostra le opzioni dopo un breve ritardo per assicurarsi che il dropdown sia visibile
+            setTimeout(() => this.showWildcardOptions(result, searchInfo), 50);
             return;
         }
 
@@ -302,20 +302,14 @@ export class TagCompleter {
 
     // --- wildcard options ---
     showWildcardOptions(wildcardResult, originalSearchInfo) {
-        console.log("showWildcardOptions called with:", wildcardResult);
-        
         // Dividi le opzioni della wildcard
         const options = wildcardResult.wildcardValue.split(',').map(opt => opt.trim()).filter(opt => opt);
-        
-        console.log("Wildcard options:", options);
         
         if (options.length === 0) return;
 
         // Limita il numero di opzioni per evitare troppe risultati
         const maxOptions = 30;
         const limitedOptions = options.slice(0, maxOptions);
-        
-        console.log("Limited options:", limitedOptions.length, "of", options.length);
 
         // Crea i risultati per le opzioni
         const optionResults = limitedOptions.map((option, index) => ({
@@ -330,10 +324,15 @@ export class TagCompleter {
             wildcardValue: null
         }));
 
-        console.log("Option results:", optionResults);
-
         // Mostra le opzioni
-        this.dropdownController.showDropdown(optionResults, originalSearchInfo);
+        const items = this.dropdownRenderer.createDropdownItems(
+            optionResults, 
+            originalSearchInfo, 
+            (e, result, searchInfo) => this.handleItemClick(e, result, searchInfo)
+        );
+        
+        const position = this.helper.getCursorOffset();
+        this.dropdownController.show(items, position);
         
         // Imposta la modalità wildcard
         this.isInWildcardMode = true;
