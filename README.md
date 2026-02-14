@@ -54,6 +54,24 @@ cd ComfyUI\custom_nodes
 git clone https://github.com/huchukato/comfy-tagcomplete.git
 ```
 
+### 📁 Manual Wildcard Setup (Optional)
+
+If you're installing manually or want to use wildcards with Impact Pack, you may need to copy the wildcards folder:
+
+1. **Copy wildcards to Impact Pack:**
+   ```bash
+   cp -r /path/to/comfy-tagcomplete/wildcards /path/to/ComfyUI/custom_nodes/comfyui-impact-pack/wildcards/
+   ```
+
+2. **Or copy to ComfyUI models:**
+   ```bash
+   cp -r /path/to/comfy-tagcomplete/wildcards /path/to/ComfyUI/models/wildcards/
+   ```
+
+3. **Restart ComfyUI** to load the new wildcards
+
+**Note:** The extension automatically detects wildcards from multiple sources, but manual copying ensures maximum compatibility with Impact Pack and other extensions.
+
 ## Settings
 ![settings](https://files.catbox.moe/0ai9mj.png)
 
