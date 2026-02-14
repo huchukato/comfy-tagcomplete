@@ -3,7 +3,7 @@
 [<img src="https://img.shields.io/badge/lang-Italiano-red.svg?style=plastic" height="25" />](README.it.md)
 [<img src="https://img.shields.io/badge/lang-English-blue.svg?style=plastic" height="25" />](README.md)
 
-![capture](https://files.catbox.moe/fv292m.webp)
+![demo](https://imgur.com/MViHylT)
 
 ## 🎯 About
 
