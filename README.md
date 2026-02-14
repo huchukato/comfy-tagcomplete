@@ -9,7 +9,8 @@
 [<img src="https://img.shields.io/badge/lang-English-red.svg?style=plastic" height="25" />](README.md)
 [<img src="https://img.shields.io/badge/lang-Italiano-blue.svg?style=plastic" height="25" />](README.it.md)
 
-![demo](https://raw.githubusercontent.com/huchukato/comfy-tagcomplete/main/assets/demo.mp4)
+[demo.webm](https://github.com/user-attachments/assets/d55e4159-a524-4b05-b8d2-3c62ad6b207f)
+
 
 *🎬 **Watch the demo**: See wildcard sub-selection and tag completion in action!*
 
