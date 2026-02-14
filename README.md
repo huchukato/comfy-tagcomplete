@@ -42,7 +42,7 @@ This extension is based on [ComfyUI-Custom-Scripts](https://github.com/pythongos
 
 The following files in the tags folder are based on or inspired by [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete):
 
-- danbooru.csv (enhanced with 4-column format)
+- danbooru.csv (updated and cleaned, deprecated tags removed as of February 2026)
 - danbooru_e621_merged.csv
 - extra-quality-tags.csv
 
