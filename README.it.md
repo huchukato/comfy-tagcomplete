@@ -34,13 +34,13 @@ Questa versione introduce la **selezione opzioni wildcard in stile a1111-sd-webu
 
 Questa estensione è basata su [ComfyUI-Custom-Scripts](https://github.com/pythongosssss/ComfyUI-Custom-Scripts).
 
-Inoltre, i seguenti file nella cartella tags:
+I seguenti file nella cartella tags sono basati o ispirati da [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete):
 
-- danbooru.csv
+- danbooru.csv (migliorato con formato a 4 colonne)
 - danbooru_e621_merged.csv
 - extra-quality-tags.csv
 
-sono presi in prestito da [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete).
+Inoltre, questa estensione include la **funzionalità di selezione opzioni wildcard** ispirata da a1111-sd-webui-tagcomplete, permettendo agli utenti di selezionare opzioni individuali dai file wildcard con un flusso di lavoro intuitivo.
 
 ## Installazione
 ```

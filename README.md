@@ -40,13 +40,13 @@ This version introduces **a1111-sd-webui-tagcomplete style wildcard sub-selectio
 
 This extension is based on [ComfyUI-Custom-Scripts](https://github.com/pythongosssss/ComfyUI-Custom-Scripts).
 
-Also, the following files in the tags folder:
+The following files in the tags folder are based on or inspired by [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete):
 
-- danbooru.csv
+- danbooru.csv (enhanced with 4-column format)
 - danbooru_e621_merged.csv
 - extra-quality-tags.csv
 
-are borrowed from [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete).
+Additionally, this extension includes **wildcard sub-selection functionality** inspired by a1111-sd-webui-tagcomplete, allowing users to select individual options from wildcard files with an intuitive workflow.
 
 ## Install
 ```
