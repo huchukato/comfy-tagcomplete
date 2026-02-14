@@ -28,23 +28,20 @@ def get_wildcard_dirs() -> List[str]:
     # 1. ComfyUI/models/wildcards (percorso standard ComfyUI)
     dirs.append(str(paths.custom_nodes_dir.parent / "models" / "wildcards"))
 
-    # 2. custom_nodes/wildcards
-    dirs.append(str(paths.custom_nodes_dir / "wildcards"))
-
-    # 3. comfyui-dynamicprompts wildcards
+    # 2. comfyui-dynamicprompts wildcards
     dirs.append(str(paths.custom_nodes_dir / "comfyui-dynamicprompts" / "wildcards"))
 
-    # 4. extra_model_paths.yaml で設定されたパス
+    # 3. extra_model_paths.yaml で設定されたパス
     try:
         # `folder_paths.get_folder_paths` はリストを返す
         dirs.extend(folder_paths.get_folder_paths("wildcards"))
     except Exception:
         pass
     
-    # 5. ComfyUI-Impact-Pack/wildcards
+    # 4. ComfyUI-Impact-Pack/wildcards
     dirs.append(str(paths.custom_nodes_dir / "ComfyUI-Impact-Pack" / "wildcards"))
 
-    # 6. ComfyUI-Impact-Pack/impact-pack.ini で設定されたパス
+    # 5. ComfyUI-Impact-Pack/impact-pack.ini で設定されたパス
     ini_file = paths.custom_nodes_dir / "ComfyUI-Impact-Pack" / "impact-pack.ini"
     try:
         config = configparser.ConfigParser()
