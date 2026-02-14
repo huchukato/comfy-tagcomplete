@@ -47,6 +47,17 @@ Inoltre, questa estensione include la **funzionalità di selezione opzioni wildc
 cd ComfyUI\custom_nodes
 git clone https://github.com/huchukato/comfy-tagcomplete.git
 ```
+### 📁 Setup Manuale Wildcard (Opzionale)
+
+Se stai installando manualmente o vuoi usare le wildcards con Impact Pack, potresti dover copiare la cartella wildcards:
+
+1. **Copia wildcards in Impact Pack:**
+   ```bash
+   cp -r /path/to/comfy-tagcomplete/wildcards /path/to/ComfyUI/custom_nodes/comfyui-impact-pack/wildcards/
+   ````
+2. **Riavvia ComfyUI per caricare le nuove wildcards**
+
+**Nota:** L'estensione rileva automaticamente le wildcards da più fonti, ma la copia manuale assicura la massima compatibilità con Impact Pack e altre estensioni.
 
 ## Impostazioni
 ![settings](https://files.catbox.moe/0ai9mj.png)
