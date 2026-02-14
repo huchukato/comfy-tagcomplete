@@ -1,15 +1,15 @@
 [project]
-name = "comfy-ex-tagcomplete"
-description = "tag completer with csv file"
-version = "2.0.2"
+name = "comfy-tagcomplete"
+description = "Tag completer with wildcard sub-selection and CSV file support"
+version = "2.0.0"
 license = {file = "LICENSE"}
 dependencies = ["sqlite3"]
 
 [project.urls]
-Repository = "https://github.com/jupo-ai/comfy-ex-tagcomplete"
+Repository = "https://github.com/huchukato/comfy-tagcomplete"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = "jupo-ai"
-DisplayName = "comfy-ex-tagcomplete"
+PublisherId = "huchukato"
+DisplayName = "ComfyUI-TagComplete"
 Icon = ""

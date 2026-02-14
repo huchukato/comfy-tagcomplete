@@ -5,6 +5,33 @@
 
 ![capture](https://files.catbox.moe/fv292m.webp)
 
+## ✨ Novità nella v2.0.0 - Selezione Opzioni Wildcard
+
+Questa versione introduce la **selezione opzioni wildcard in stile a1111-sd-webui-tagcomplete**, rendendo l'uso delle wildcard più intuitivo e potente:
+
+### 🎯 Flusso di Lavoro Wildcard
+1. **Digita `__`** per vedere le wildcard disponibili
+2. **Seleziona una wildcard** con i tasti freccia e premi **Invio** → inserisce `__nome_wildcard__`
+3. **Auto-mostra opzioni** → visualizza immediatamente tutte le opzioni da quella wildcard
+4. **Seleziona un'opzione** con i tasti freccia e premi **Invio** → sostituisce la wildcard con l'opzione scelta
+5. **ESC** → mantiene la wildcard inserita e chiude le opzioni
+
+### 🌟 Caratteristiche
+- **Parsing intelligente**: Gestisce wildcard con percorsi complessi (es. `__mbe/blwjob/blwjb__`)
+- **Opzioni riga per riga**: Ogni riga nel file wildcard diventa un'opzione separata
+- **Gestione testo lungo**: Opzioni lunghe vengono troncate con espansione al passaggio del mouse
+- **Compatibilità totale**: Funziona con file wildcard e formati esistenti
+- **Fonti multiple**: Supporta wildcard da repository, ComfyUI/models, DynamicPrompts e Impact-Pack
+
+### 📁 Fonti Wildcard (in ordine di priorità):
+1. Cartella `wildcards/` del repository
+2. ComfyUI `models/wildcards/`
+3. ComfyUI `custom_nodes/wildcards/`
+4. DynamicPrompts `wildcards/`
+5. Configurazione extra model paths
+6. Wildcard Impact-Pack
+7. Percorsi personalizzati Impact-Pack.ini
+
 Questa estensione è basata su [ComfyUI-Custom-Scripts](https://github.com/pythongosssss/ComfyUI-Custom-Scripts).
 
 Inoltre, i seguenti file nella cartella tags:
