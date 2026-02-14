@@ -11,6 +11,31 @@
 
 ![capture](https://files.catbox.moe/fv292m.webp)
 
+## 🎯 About
+
+**ComfyUI-TagComplete** is an advanced extension that brings professional-grade tag completion and wildcard sub-selection to ComfyUI, inspired by the renowned a1111-sd-webui-tagcomplete. Designed for AI artists and prompt engineers who demand precision and efficiency in their workflow.
+
+### 🚀 What Makes It Special
+
+- **🧠 Intelligent Tag Completion**: Real-time suggestions from comprehensive CSV databases (Danbooru, e621, custom tags)
+- **🎪 Wildcard Sub-Selection**: Revolutionary a1111-style workflow for complex prompt building
+- **🌐 Multi-Source Support**: Seamlessly integrates wildcards from multiple locations and extensions
+- **⚡ Performance Optimized**: Lightweight, fast, and doesn't slow down your ComfyUI experience
+- **🔧 Highly Customizable**: Extensive settings to tailor the experience to your needs
+
+### 🎨 Perfect For
+
+- **AI Artists** who want to streamline their prompt creation process
+- **Prompt Engineers** needing precise control over tag combinations
+- **Content Creators** looking to maintain consistency across generations
+- **Power Users** who want professional-grade tools in their workflow
+
+### 🌟 Key Innovation
+
+The standout feature is the **wildcard sub-selection system** - type `__`, select a wildcard, and instantly browse through individual options with smart text handling and overflow management. This transforms complex prompt building from a chore into an intuitive, creative process.
+
+---
+
 ## ✨ New in v2.0.0 - Wildcard Sub-Selection
 
 This version introduces **a1111-sd-webui-tagcomplete style wildcard sub-selection**, making wildcard usage more intuitive and powerful:
@@ -49,7 +74,7 @@ Additionally, this extension includes **wildcard sub-selection functionality** i
 
 ## Install
 ```
-cd ComfyUI\custom_nodes
+cd ComfyUI/custom_nodes
 git clone https://github.com/huchukato/comfy-tagcomplete.git
 ```
 
