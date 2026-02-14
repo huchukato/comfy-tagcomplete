@@ -32,11 +32,10 @@ This version introduces **a1111-sd-webui-tagcomplete style wildcard sub-selectio
 ### 📁 Wildcard Sources (in priority order):
 1. Repository `wildcards/` folder
 2. ComfyUI `models/wildcards/`
-3. ComfyUI `custom_nodes/wildcards/`
-4. DynamicPrompts `wildcards/`
-5. Extra model paths configuration
-6. Impact-Pack wildcards
-7. Impact-Pack.ini custom paths
+3. DynamicPrompts `wildcards/`
+4. Extra model paths configuration
+5. Impact-Pack wildcards
+6. Impact-Pack.ini custom paths
 
 This extension is based on [ComfyUI-Custom-Scripts](https://github.com/pythongosssss/ComfyUI-Custom-Scripts).
 

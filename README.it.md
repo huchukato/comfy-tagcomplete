@@ -26,11 +26,10 @@ Questa versione introduce la **selezione opzioni wildcard in stile a1111-sd-webu
 ### 📁 Fonti Wildcard (in ordine di priorità):
 1. Cartella `wildcards/` del repository
 2. ComfyUI `models/wildcards/`
-3. ComfyUI `custom_nodes/wildcards/`
-4. DynamicPrompts `wildcards/`
-5. Configurazione extra model paths
-6. Wildcard Impact-Pack
-7. Percorsi personalizzati Impact-Pack.ini
+3. DynamicPrompts `wildcards/`
+4. Configurazione extra model paths
+5. Wildcard Impact-Pack
+6. Percorsi personalizzati Impact-Pack.ini
 
 Questa estensione è basata su [ComfyUI-Custom-Scripts](https://github.com/pythongosssss/ComfyUI-Custom-Scripts).
 
