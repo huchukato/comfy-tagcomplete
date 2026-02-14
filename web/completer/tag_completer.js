@@ -276,8 +276,8 @@ export class TagCompleter {
                 this.element.selectionStart = closestMatch.start;
                 this.element.selectionEnd = closestMatch.end;
                 
-                // Inserisci l'opzione
-                this.helper.insertAtCursor(result.value, closestMatch.text.length);
+                // Inserisci l'opzione sostituendo la wildcard
+                this.helper.insertAtCursor(result.value, 0, 0);
                 
                 // Resetta la modalità wildcard
                 this.isInWildcardMode = false;
