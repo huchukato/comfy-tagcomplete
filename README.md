@@ -9,7 +9,7 @@
 [<img src="https://img.shields.io/badge/lang-English-red.svg?style=plastic" height="25" />](README.md)
 [<img src="https://img.shields.io/badge/lang-Italiano-blue.svg?style=plastic" height="25" />](README.it.md)
 
-![capture](https://files.catbox.moe/fv292m.webp)
+![demo](https://imgur.com/MViHylT)
 
 ## 🎯 About
 
