@@ -63,12 +63,7 @@ If you're installing manually or want to use wildcards with Impact Pack, you may
    cp -r /path/to/comfy-tagcomplete/wildcards /path/to/ComfyUI/custom_nodes/comfyui-impact-pack/wildcards/
    ```
 
-2. **Or copy to ComfyUI models:**
-   ```bash
-   cp -r /path/to/comfy-tagcomplete/wildcards /path/to/ComfyUI/models/wildcards/
-   ```
-
-3. **Restart ComfyUI** to load the new wildcards
+2. **Restart ComfyUI** to load the new wildcards
 
 **Note:** The extension automatically detects wildcards from multiple sources, but manual copying ensures maximum compatibility with Impact Pack and other extensions.
 
