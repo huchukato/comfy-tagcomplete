@@ -3,7 +3,7 @@
 [<img src="https://img.shields.io/badge/lang-Italiano-red.svg?style=plastic" height="25" />](README.it.md)
 [<img src="https://img.shields.io/badge/lang-English-blue.svg?style=plastic" height="25" />](README.md)
 
-![demo](https://raw.githubusercontent.com/huchukato/comfy-tagcomplete/main/assets/comfyuitagcomplete.webm)
+![demo](https://raw.githubusercontent.com/huchukato/comfy-tagcomplete/main/assets/demo.mp4)
 
 *🎬 **Guarda la demo**: Vedi la selezione opzioni wildcard e il completamento tag in azione!*
 
