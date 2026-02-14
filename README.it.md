@@ -5,6 +5,31 @@
 
 ![capture](https://files.catbox.moe/fv292m.webp)
 
+## 🎯 About
+
+**ComfyUI-TagComplete** è un'estensione avanzata che porta il completamento tag professionale e la selezione opzioni wildcard a ComfyUI, ispirata dal rinomato a1111-sd-webui-tagcomplete. Progettata per artisti AI e ingegneri di prompt che richiedono precisione ed efficienza nel loro workflow.
+
+### 🚀 Cosa Rende Speciale
+
+- **🧠 Completamento Tag Intelligente**: Suggerimenti in tempo reale da database CSV completi (Danbooru, e621, tag personalizzati)
+- **🎪 Selezione Opzioni Wildcard**: Workflow rivoluzionario in stile a1111 per la creazione di prompt complessi
+- **🌐 Supporto Multi-Fonte**: Integra perfettamente wildcard da multiple posizioni ed estensioni
+- **⚡ Performance Ottimizzate**: Leggero, veloce, e non rallenta la tua esperienza ComfyUI
+- **🔧 Altamente Personalizzabile**: Impostazioni estese per adattare l'esperienza alle tue esigenze
+
+### 🎨 Perfetto Per
+
+- **Artisti AI** che vogliono semplificare il loro processo di creazione prompt
+- **Ingegneri di Prompt** che necessitano controllo preciso sulle combinazioni di tag
+- **Content Creator** che cercano coerenza tra le generazioni
+- **Power User** che vogliono strumenti professionali nel loro workflow
+
+### 🌟 Innovazione Chiave
+
+La caratteristica di spicco è il **sistema di selezione opzioni wildcard** - digita `__`, seleziona una wildcard, e sfoglia istantaneamente le opzioni individuali con gestione intelligente del testo e overflow. Questo trasforma la creazione di prompt complessi da un compito in un processo creativo e intuitivo.
+
+---
+
 ## ✨ Novità nella v2.0.0 - Selezione Opzioni Wildcard
 
 Questa versione introduce la **selezione opzioni wildcard in stile a1111-sd-webui-tagcomplete**, rendendo l'uso delle wildcard più intuitivo e potente:
@@ -43,7 +68,7 @@ Inoltre, questa estensione include la **funzionalità di selezione opzioni wildc
 
 ## Installazione
 ```
-cd ComfyUI\custom_nodes
+cd ComfyUI/custom_nodes
 git clone https://github.com/huchukato/comfy-tagcomplete.git
 ```
 ### 📁 Setup Manuale Wildcard (Opzionale)
