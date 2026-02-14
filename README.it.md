@@ -36,7 +36,7 @@ Questa estensione è basata su [ComfyUI-Custom-Scripts](https://github.com/pytho
 
 I seguenti file nella cartella tags sono basati o ispirati da [a1111-sd-webui-tagcomplete](https://github.com/DominikDoom/a1111-sd-webui-tagcomplete):
 
-- danbooru.csv (migliorato con formato a 4 colonne)
+- danbooru.csv (aggiornato e pulito, tag deprecati rimossi a febbraio 2026)
 - danbooru_e621_merged.csv
 - extra-quality-tags.csv
 
