@@ -2,7 +2,7 @@ import re
 import random
 import numpy as np
 from .wildcards import WildcardLoader
-from comfy.comfy_types import IO 
+from comfy.comfy_types import IO     
 
 class WildcardProcessorNode:
     """
@@ -22,7 +22,7 @@ class WildcardProcessorNode:
             }
         }
 
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (IO.STRING,)
     RETURN_NAMES = ("processed_text",)
     FUNCTION = "process_wildcards"
     CATEGORY = "ComfyUI-TagComplete"
