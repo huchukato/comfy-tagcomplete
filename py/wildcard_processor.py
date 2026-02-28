@@ -88,7 +88,11 @@ class WildcardProcessorNode:
             text, replacements_found_2 = self._replace_wildcards(text, random_gen)
 
             # Se non ci sono più sostituzioni, ferma il ciclo
-            if not replacements_found_1 and not replacements_found_2:
+            # Ma prima controlla se ci sono ancora pattern da elaborare
+            has_wildcard_patterns = '__' in text
+            has_option_patterns = '{' in text and '}' in text
+
+            if not replacements_found_1 and not replacements_found_2 and not has_wildcard_patterns and not has_option_patterns:
                 stop_unwrap = True
 
         return text
