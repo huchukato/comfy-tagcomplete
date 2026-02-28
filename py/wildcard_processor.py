@@ -14,7 +14,7 @@ class WildcardProcessorNode:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "text": ("STRING", {"multiline": True, "default": ""}),
+                "text": ("STRING", {"multiline": True, "dynamicPrompts": False, "default": ""}),
             },
             "optional": {
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
