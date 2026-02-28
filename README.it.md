@@ -32,6 +32,71 @@ La caratteristica di spicco è il **sistema di selezione opzioni wildcard** - di
 
 ---
 
+## ⚙️ Nodo Wildcard Processor
+
+**ComfyUI-TagComplete** ora include un potente nodo **WildcardProcessor** che porta capacità avanzate di processing dei prompt direttamente nei tuoi workflow ComfyUI, eliminando la necessità di installare tutto l'Impact Pack solo per il processing delle wildcard.
+
+### 🎯 Caratteristiche
+
+- **🧠 Processing Avanzato Wildcard**: Processa prompt complessi con wildcard nel formato `__keyword__`
+- **🎲 Opzioni Dinamiche**: Supporto per scelte multiple `{opzione1|opzione2|opzione3}`
+- **📊 Randomizzazione Pesata**: Selezione basata su probabilità con sintassi `peso::opzione`
+- **🔢 Quantificatori**: Seleziona più elementi con sintassi `numero__keyword__`
+- **🎭 Separatori Personalizzati**: Controllo della formattazione output con separatori personalizzati
+- **🌱 Risultati Riproducibili**: Randomizzazione basata su seed per output consistenti
+
+### 📝 Esempi di Utilizzo
+
+#### Processing Base Wildcard
+```
+Input: Un bellissimo __colore__ dipinto paesaggistico
+Output: Un bellissimo rosso dipinto paesaggistico
+```
+
+#### Opzioni a Scelta Multipla
+```
+Input: Un {gatto|cane|uccello} seduto su un {sedia|tavolo|pavimento}
+Output: Un gatto seduto su una sedia
+```
+
+#### Randomizzazione Pesata
+```
+Input: Crea un'immagine {2::ritratto|1::paesaggio}
+Output: Crea un'immagine ritratto (66% probabilità) o paesaggio (33% probabilità)
+```
+
+#### Quantificatori
+```
+Input: 3__colore__ fiori in un __contenitore__
+Output: fiori rossi gialli blu in un vaso
+```
+
+#### Separatori Personalizzati
+```
+Input: {mela$$, $$arancia$$, $$banana$$}__frutto__
+Output: frutta mela, arancia, banana
+```
+
+### 🔧 Input del Nodo
+
+- **text** (STRING, obbligatorio): Il testo del prompt contenente wildcard e opzioni dinamiche
+- **seed** (INT, opzionale): Seed per la randomizzazione (0 = seed casuale)
+
+### 📤 Output del Nodo
+
+- **processed_text** (STRING): Il prompt completamente elaborato con tutti i wildcard risolti
+
+### 🚀 Integrazione Workflow
+
+Il nodo WildcardProcessor si integra perfettamente nei tuoi workflow ComfyUI esistenti:
+
+1. **Connetti** la tua generazione di prompt all'input `text`
+2. **Imposta un seed** per risultati riproducibili (opzionale)
+3. **Connetti l'output** alla tua pipeline text-to-image
+4. **Genera** con prompt completamente risolti e dinamici!
+
+---
+
 ## ✨ Novità nella v2.0.0 - Selezione Opzioni Wildcard
 
 Questa versione introduce la **selezione opzioni wildcard in stile a1111-sd-webui-tagcomplete**, rendendo l'uso delle wildcard più intuitivo e potente:

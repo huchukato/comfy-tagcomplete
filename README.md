@@ -40,6 +40,71 @@ The standout feature is the **wildcard sub-selection system** - type `__`, selec
 
 ---
 
+## ⚙️ Wildcard Processor Node
+
+**ComfyUI-TagComplete** now includes a powerful **WildcardProcessor** node that brings advanced prompt processing capabilities directly to your ComfyUI workflows, eliminating the need to install the entire Impact Pack just for wildcard processing.
+
+### 🎯 Features
+
+- **🧠 Advanced Wildcard Processing**: Process complex prompts with wildcards in the format `__keyword__`
+- **🎲 Dynamic Options**: Support for multiple choice options `{option1|option2|option3}`
+- **📊 Weighted Randomization**: Probability-based selection with syntax `weight::option`
+- **🔢 Quantifiers**: Select multiple items with syntax `count__keyword__`
+- **🎭 Custom Separators**: Control output formatting with custom separators
+- **🌱 Reproducible Results**: Seed-based randomization for consistent outputs
+
+### 📝 Usage Examples
+
+#### Basic Wildcard Processing
+```
+Input: A beautiful __color__ landscape painting
+Output: A beautiful red landscape painting
+```
+
+#### Multiple Choice Options
+```
+Input: A {cat|dog|bird} sitting on a {chair|table|floor}
+Output: A cat sitting on a chair
+```
+
+#### Weighted Randomization
+```
+Input: Create a {2::portrait|1::landscape} image
+Output: Create a portrait image (66% chance) or landscape image (33% chance)
+```
+
+#### Quantifiers
+```
+Input: 3__color__ flowers in a __container__
+Output: red yellow blue flowers in a vase
+```
+
+#### Custom Separators
+```
+Input: {apple$$, $$orange$$, $$banana$$}__fruit__
+Output: apple, orange, banana fruits
+```
+
+### 🔧 Node Inputs
+
+- **text** (STRING, required): The prompt text containing wildcards and dynamic options
+- **seed** (INT, optional): Randomization seed (0 = random seed)
+
+### 📤 Node Outputs
+
+- **processed_text** (STRING): The fully processed prompt with all wildcards resolved
+
+### 🚀 Workflow Integration
+
+The WildcardProcessor node seamlessly integrates with your existing ComfyUI workflows:
+
+1. **Connect** your prompt generation to the `text` input
+2. **Set a seed** for reproducible results (optional)
+3. **Connect the output** to your text-to-image pipeline
+4. **Generate** with fully resolved, dynamic prompts!
+
+---
+
 ## ✨ New in v2.0.0 - Wildcard Sub-Selection
 
 This version introduces **a1111-sd-webui-tagcomplete style wildcard sub-selection**, making wildcard usage more intuitive and powerful:
