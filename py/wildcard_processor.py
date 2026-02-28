@@ -37,6 +37,8 @@ class WildcardProcessorNode:
         Returns:
             Testo elaborato con wildcards sostituiti
         """
+        # Assicura che le wildcards siano caricate
+        WildcardLoader.load()
         if seed == 0:
             # Usa un seed casuale se non specificato
             seed = random.randint(0, 0xffffffffffffffff)
