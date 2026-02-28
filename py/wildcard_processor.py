@@ -257,18 +257,13 @@ class WildcardProcessorNode:
                 replacements_found = True
                 string = string.replace(f"__{match}__", replacement, 1)
                 
-                # 🔄 ELABORAZIONE ANNIDATA: Ri-elabora il testo dopo ogni sostituzione
-                # per gestire wildcards che contengono altre wildcards
-                string, _ = self._replace_options(string, random_gen)
-                string, _ = self._replace_wildcards(string, random_gen)
-                
             elif '*' in keyword:
                 # Gestisci pattern con wildcard
                 total_patterns = []
                 found = False
 
                 # Cerca pattern corrispondenti
-                wildcard_dict = self._get_wildcard_dict()
+                wildcard_dict = WildcardLoader.get_wildcards_dict()
 
                 if keyword.startswith('*/') and len(keyword) > 2:
                     base_name = keyword[2:]
@@ -295,15 +290,6 @@ class WildcardProcessorNode:
                     replacement = random_gen.choice(total_patterns)
                     replacements_found = True
                     string = string.replace(f"__{match}__", replacement, 1)
-                    
-                    # 🔄 ELABORAZIONE ANNIDATA anche per pattern matching
-                    string, _ = self._replace_options(string, random_gen)
-                    string, _ = self._replace_wildcards(string, random_gen)
-                    
-            elif '/' not in keyword:
-                # Fallback: prova con __*/keyword__
-                string_fallback = string.replace(f"__{match}__", f"__/*/{match}__", 1)
-                string, replacements_found = self._replace_wildcards(string_fallback, random_gen)
 
         return string, replacements_found
 
