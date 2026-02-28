@@ -2,6 +2,7 @@ import re
 import random
 import numpy as np
 from .wildcards import WildcardLoader
+from comfy.comfy_types import IO 
 
 class WildcardProcessorNode:
     """
@@ -14,7 +15,7 @@ class WildcardProcessorNode:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "text": ("STRING", {"multiline": True, "dynamicPrompts": True, "tooltip": "Enter a prompt using wildcard syntax."}),
+                "text": (IO.STRING, {"multiline": True, "dynamicPrompts": True, "tooltip": "Enter a prompt using wildcard syntax."}),
             },
             "optional": {
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff, "tooltip": "Seed for randomization (0 = random)"}),
