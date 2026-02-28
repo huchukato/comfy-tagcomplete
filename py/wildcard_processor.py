@@ -2,7 +2,7 @@ import re
 import random
 import numpy as np
 from .wildcards import WildcardLoader
-from comfy.comfy_types import IO     
+from comfy.comfy_types import IO, InputTypeDict  
 
 class WildcardProcessorNode:
     """
@@ -12,7 +12,7 @@ class WildcardProcessorNode:
     """
 
     @classmethod
-    def INPUT_TYPES(s):
+    def INPUT_TYPES(s) -> InputTypeDict:
         return {
             "required": {
                 "text": (IO.STRING, {"multiline": True, "dynamicPrompts": True, "tooltip": "Enter a prompt using wildcard syntax."}),
