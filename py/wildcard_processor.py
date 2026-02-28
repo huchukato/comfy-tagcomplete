@@ -62,9 +62,13 @@ class WildcardProcessorNode:
         # Ciclo per gestire sostituzioni annidate
         replace_depth = 100
         stop_unwrap = False
-
-        while not stop_unwrap and replace_depth > 1:
-            replace_depth -= 1  # Previene loop infiniti
+ 
+        while not stop_unwrap:
+            replace_depth -= 1
+    
+            # Protezione contro loop infiniti reali
+            if replace_depth <= 0:
+                break  # Esci dal ciclo se hai fatto troppe iterazioni
 
             # Elabora quantificatori di wildcards (es. 2__keyword__)
             option_quantifier = self._find_wildcard_quantifiers(text)
