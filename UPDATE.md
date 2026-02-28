@@ -2,6 +2,38 @@
 
 All notable changes to ComfyUI-TagComplete will be documented in this file.
 
+## [2.1.0] - 2026-02-28
+
+### 🎉 MAJOR FEATURE - WildcardProcessor Node
+- **NEW**: Full-featured wildcard processing node (no Impact Pack required!)
+- **NEW**: Advanced wildcard syntax support (`__keyword__`, `{option1|option2}`, `count__keyword__`)
+- **NEW**: Weighted randomization with probability syntax (`2::option|1::option`)
+- **NEW**: Quantifiers for multiple selections (`3__color__`)
+- **NEW**: Custom separators for output formatting (`{a$$, $$b$$, $$c__`)
+- **NEW**: Nested wildcard processing (wildcards inside wildcards fully resolved)
+- **NEW**: Seed-based randomization for reproducible results
+- **NEW**: Seamless integration with existing TagComplete wildcard system
+
+### 🔧 Technical Improvements
+- **IMPROVED**: Python implementation using NumPy for optimized randomization
+- **IMPROVED**: Iterative processing loop ensuring all nested wildcards are resolved
+- **IMPROVED**: Pattern matching for wildcard keys in subdirectories
+- **IMPROVED**: Better error handling with graceful fallbacks
+
+### 📦 Dependencies
+- **REMOVED**: No longer requires ComfyUI-Impact-Pack for wildcard processing
+- **REQUIRES**: NumPy (usually already installed with ComfyUI)
+
+### 🐛 Bug Fixes
+- Fixed nested wildcards not being fully processed
+- Fixed wildcard key matching for files in subdirectories
+- Fixed premature loop termination in wildcard processing
+
+### ⚠️ Breaking Changes
+- None - fully backward compatible
+
+---
+
 ## [2.0.0] - 2025-02-14
 
 ### 🎉 MAJOR FEATURE - Wildcard Sub-Selection
