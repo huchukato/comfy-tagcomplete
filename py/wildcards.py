@@ -12,7 +12,7 @@ from typing import List, Dict, Tuple, Optional, Any
 # 以下のフォルダからワイルドカードを取得する
 #   0. wildcards (del nostro repository)
 #   1. ComfyUI/models/wildcards
-#   2. comfyui-dynamicprompts/wildcards
+#   2. ComfyUI-Easy-Use/wildcards
 #   3. extra_model_pathsでwildcardsに設定されたディレクトリ
 #   4. ComfyUI-Impact-Pack/wildcards
 #   5. ComfyUI-Impact-Pack/impact-pack.iniで設定されたディレクトリ
@@ -27,8 +27,8 @@ def get_wildcard_dirs() -> List[str]:
     # 1. ComfyUI/models/wildcards (percorso standard ComfyUI)
     dirs.append(str(paths.custom_nodes_dir.parent / "models" / "wildcards"))
 
-    # 2. comfyui-dynamicprompts wildcards
-    dirs.append(str(paths.custom_nodes_dir / "comfyui-dynamicprompts" / "wildcards"))
+    # 2. ComfyUI-Easy-Use/wildcards
+    dirs.append(str(paths.custom_nodes_dir / "ComfyUI-Easy-Use" / "wildcards"))
 
     # 3. extra_model_paths.yaml で設定されたパス
     try:
