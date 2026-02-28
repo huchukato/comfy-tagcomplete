@@ -293,9 +293,28 @@ class WildcardProcessorNode:
     def _get_wildcard_options(self, keyword):
         """
         Ottieni le opzioni per un wildcard specifico.
+        Prima cerca la chiave diretta, poi pattern di ricerca.
         """
         wildcard_dict = WildcardLoader.get_wildcards_dict()
-        return wildcard_dict.get(keyword)
+        
+        # Prima prova la chiave diretta
+        options = wildcard_dict.get(keyword)
+        if options:
+            return options
+        
+        # Se non trova, cerca con pattern (come Impact Pack)
+        total_patterns = []
+        found = False
+        
+        # Pattern matching generale - cerca chiavi che terminano con /keyword
+        for k in wildcard_dict.keys():
+            if k == keyword or k.endswith('/' + keyword):
+                v = wildcard_dict.get(k)
+                if v:
+                    total_patterns.extend(v)
+                    found = True
+        
+        return total_patterns if found else None
 
     def _wildcard_normalize(self, x):
         """Normalizza il nome del wildcard."""
