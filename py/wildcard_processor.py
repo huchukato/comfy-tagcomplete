@@ -59,17 +59,10 @@ class WildcardProcessorNode:
         # Prima elabora i commenti (se presenti)
         text = self._process_comment_out(text)
 
-        # Ciclo per gestire sostituzioni annidate
-        replace_depth = 100
-        stop_unwrap = False
- 
-        while not stop_unwrap:
-            replace_depth -= 1
+        # Ciclo semplificato come Impact Pack
+        while True:
+            original_text = text
     
-            # Protezione contro loop infiniti reali
-            if replace_depth <= 0:
-                break  # Esci dal ciclo se hai fatto troppe iterazioni
-
             # Elabora quantificatori di wildcards (es. 2__keyword__)
             option_quantifier = self._find_wildcard_quantifiers(text)
             for match in option_quantifier:
@@ -86,17 +79,14 @@ class WildcardProcessorNode:
                 text = text.replace(match['full_match'], replacement)
 
             # Elabora opzioni multiple {opzione1|opzione2|opzione3}
-            text, replacements_found_1 = self._replace_options(text, random_gen)
+            text, _ = self._replace_options(text, random_gen)
 
             # Elabora wildcards __keyword__
-            text, replacements_found_2 = self._replace_wildcards(text, random_gen)
+            text, _ = self._replace_wildcards(text, random_gen)
 
-            # Se non ci sono più pattern da elaborare, ferma il ciclo
-            has_wildcard_patterns = '__' in text
-            has_option_patterns = '{' in text and '}' in text
-
-            if not has_wildcard_patterns and not has_option_patterns:
-                stop_unwrap = True
+            # Se il testo non è cambiato, abbiamo finito
+            if text == original_text:
+                break
 
         return text
 
