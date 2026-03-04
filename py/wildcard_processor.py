@@ -84,14 +84,16 @@ class WildcardProcessorNode:
 
                 text = text.replace(match['full_match'], replacement)
 
-            # Elabora opzioni multiple {opzione1|opzione2|opzione3}
+            # pass1: replace options - ciclo continuo come Impact Pack
             text, replacements_found_1 = self._replace_options(text, random_gen)
+            while replacements_found_1:
+                text, replacements_found_1 = self._replace_options(text, random_gen)
 
-            # Elabora wildcards __keyword__
+            # pass2: replace wildcards
             text, replacements_found_2 = self._replace_wildcards(text, random_gen)
 
             # Se non ci sono più sostituzioni E il testo non è cambiato, ferma il ciclo
-            if not replacements_found_1 and not replacements_found_2 and text == original_text:
+            if not replacements_found_2 and text == original_text:
                 stop_unwrap = True
 
         return text
