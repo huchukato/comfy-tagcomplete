@@ -173,9 +173,5 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# tags dir
-tags/
-translate/
-
 # macOS
 .DS_Store
