@@ -214,6 +214,10 @@ class WildcardProcessorNode:
         # Pattern per opzioni multiple
         pattern = r'(?<!\\)\{((?:[^{}]|(?<=\\)[{}])*?)(?<!\\)\}'
         replaced_string = re.sub(pattern, replace_option, string)
+        
+        # Se la stringa è cambiata, allora c'è stata una sostituzione
+        if replaced_string != string:
+            replacements_found = True
 
         return replaced_string, replacements_found
 
