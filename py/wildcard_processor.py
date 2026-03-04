@@ -67,6 +67,7 @@ class WildcardProcessorNode:
 
         while not stop_unwrap and replace_depth > 1:
             replace_depth -= 1  # Previene loop infiniti
+            original_text = text  # Salva il testo prima delle modifiche
 
             # Elabora quantificatori di wildcards (es. 2__keyword__)
             option_quantifier = self._find_wildcard_quantifiers(text)
@@ -89,8 +90,8 @@ class WildcardProcessorNode:
             # Elabora wildcards __keyword__
             text, replacements_found_2 = self._replace_wildcards(text, random_gen)
 
-            # Se non ci sono più sostituzioni, ferma il ciclo
-            if not replacements_found_1 and not replacements_found_2:
+            # Se non ci sono più sostituzioni E il testo non è cambiato, ferma il ciclo
+            if not replacements_found_1 and not replacements_found_2 and text == original_text:
                 stop_unwrap = True
 
         return text
