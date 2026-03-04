@@ -304,9 +304,37 @@ class WildcardProcessorNode:
     def _get_wildcard_options(self, keyword):
         """
         Ottieni le opzioni per un wildcard specifico.
+        Implementa la logica di pattern matching dell'Impact Pack.
         """
         wildcard_dict = WildcardLoader.get_wildcards_dict()
-        return wildcard_dict.get(keyword)
+        
+        # Prima prova la chiave diretta
+        options = wildcard_dict.get(keyword)
+        if options:
+            return options
+        
+        # Fallback: Try pattern matching to find wildcards at any depth
+        # Example: "indoor" matches "indoor.txt", "locations/indoor.txt", "indoor/specific.txt", etc.
+        matched_keys = []
+        for k in wildcard_dict.keys():
+            if (k == keyword or
+                k.endswith('/' + keyword) or
+                k.startswith(keyword + '/') or
+                ('/' + keyword + '/') in k):
+                matched_keys.append(k)
+
+        if matched_keys:
+            # Collect all options from matched keys
+            all_options = []
+            for matched_key in matched_keys:
+                value = wildcard_dict.get(matched_key)
+                if value:
+                    all_options.extend(value)
+
+            if all_options:
+                return all_options
+        
+        return None
 
     def _wildcard_normalize(self, x):
         """Normalizza il nome del wildcard."""
