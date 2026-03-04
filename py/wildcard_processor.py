@@ -2,6 +2,7 @@ import re
 import random
 import numpy as np
 from .wildcards import WildcardLoader
+from comfy.comfy_types import IO, InputTypeDict
 
 class WildcardProcessorNode:
     """
@@ -11,17 +12,17 @@ class WildcardProcessorNode:
     """
 
     @classmethod
-    def INPUT_TYPES(s):
+    def INPUT_TYPES(s) -> InputTypeDict:
         return {
             "required": {
-                "text": ("STRING", {"multiline": True, "default": ""}),
+                "text": (IO.STRING, {"multiline": True, "dynamicPrompts": True, "tooltip": "Enter a prompt using wildcard syntax."}),
             },
             "optional": {
-                "seed": ("INT", {"default": 0, "min": 0, "max": 0xffffffffffffffff}),
+                "seed": (IO.INT, {"default": 0, "min": 0, "max": 0xffffffffffffffff, "tooltip": "Seed for randomization (0 = random)"}),
             }
         }
 
-    RETURN_TYPES = ("STRING",)
+    RETURN_TYPES = (IO.STRING,)
     RETURN_NAMES = ("processed_text",)
     FUNCTION = "process_wildcards"
     CATEGORY = "ComfyUI-TagComplete"
@@ -37,6 +38,9 @@ class WildcardProcessorNode:
         Returns:
             Testo elaborato con wildcards sostituiti
         """
+        # Assicura che le wildcards siano caricate
+        WildcardLoader.load()
+        
         if seed == 0:
             # Usa un seed casuale se non specificato
             seed = random.randint(0, 0xffffffffffffffff)
