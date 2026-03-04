@@ -2,7 +2,7 @@
 
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-Extension-blue?logo=comfyui&style=for-the-badge)](https://github.com/comfyanonymous/ComfyUI)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.0.0-orange?style=for-the-badge)](https://github.com/huchukato/comfy-tagcomplete/releases)
+[![Version](https://img.shields.io/badge/Version-2.1.1-orange?style=for-the-badge)](https://github.com/huchukato/comfy-tagcomplete/releases)
 [![Stars](https://img.shields.io/github/stars/huchukato/comfy-tagcomplete?style=for-the-badge&logo=github)](https://github.com/huchukato/comfy-tagcomplete)
 [![Issues](https://img.shields.io/github/issues/huchukato/comfy-tagcomplete?style=for-the-badge&logo=github)](https://github.com/huchukato/comfy-tagcomplete/issues)
 
@@ -220,3 +220,21 @@ Multiple prefixes can be set.
 - Example
   - `++pink skirt`
     - When searching for "skirt" and selecting `pleated skirt`, the result will be `pink pleated skirt`.
+
+---
+
+## 📋 Changelog
+
+### v2.1.1 - Critical Wildcard Processor Fixes
+- **Fixed nested wildcard processing** - Now properly processes wildcards like `__mbe/prmpt/lctns/rndmlctns__`
+- **Fixed dynamic prompts** - Correctly handles `{__indoor__|__outdoor__|__special__}` with nested wildcards
+- **Impact Pack compatibility** - Implemented original Impact Pack processing logic
+- **Pattern matching** - Added depth-agnostic wildcard pattern matching
+- **Stable reference point** - This commit serves as the stable working baseline
+
+### v2.0.0 - Wildcard Sub-Selection Feature
+- **Wildcard option selection** in a1111-sd-webui-tagcomplete style
+- **Auto-show options** when inserting wildcards
+- **Keyboard navigation** with arrow keys and Enter
+- **Category filtering** and prefix support
+- **WildcardProcessor node** for advanced wildcard processing

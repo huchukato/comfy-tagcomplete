@@ -97,9 +97,15 @@ Il nodo WildcardProcessor si integra perfettamente nei tuoi workflow ComfyUI esi
 
 ---
 
-## ✨ Novità nella v2.0.0 - Selezione Opzioni Wildcard
+## ✨ Novità nella v2.1.1 - Fix Wildcard Processor Completo
 
-Questa versione introduce la **selezione opzioni wildcard in stile a1111-sd-webui-tagcomplete**, rendendo l'uso delle wildcard più intuitivo e potente:
+Questa versione risolve tutti i problemi con il **Wildcard Processor** e ripristina la piena compatibilità con l'Impact Pack:
+
+### 🔧 Fix Critici
+- **Nested wildcard processing**: Risolto il processing delle wildcard annidate come `__mbe/prmpt/lctns/rndmlctns__`
+- **Dynamic prompts**: Corretta elaborazione dei dynamic prompts `{__indoor__|__outdoor__|__special__}`
+- **Impact Pack compatibility**: Implementata la logica di processing dell'Impact Pack originale
+- **Pattern matching**: Aggiunto depth-agnostic pattern matching per trovare wildcard a qualsiasi profondità
 
 ### 🎯 Flusso di Lavoro Wildcard
 1. **Digita `__`** per vedere le wildcard disponibili
