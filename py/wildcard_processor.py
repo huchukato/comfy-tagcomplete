@@ -15,7 +15,7 @@ class WildcardProcessorNode:
     def INPUT_TYPES(s) -> InputTypeDict:
         return {
             "required": {
-                "text": (IO.STRING, {"multiline": True, "dynamicPrompts": True, "tooltip": "Enter a prompt using wildcard syntax."}),
+                "text": (IO.STRING, {"default": "", "multiline": True, "tooltip": "Enter a prompt using wildcard syntax."}),
             },
             "optional": {
                 "seed": (IO.INT, {"default": 0, "min": 0, "max": 0xffffffffffffffff, "tooltip": "Seed for randomization (0 = random)"}),
