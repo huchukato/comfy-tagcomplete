@@ -62,6 +62,38 @@ const extension = {
     // ------------------------------------------
     setup: async function(app) {
     },
+
+    // ------------------------------------------
+    // Node definition extension
+    // ------------------------------------------
+    beforeRegisterNodeDef: function(nodeType, nodeData, app) {
+        if (nodeData.name === "WildcardProcessor") {
+            const onNodeCreated = nodeType.prototype.onNodeCreated;
+            nodeType.prototype.onNodeCreated = function() {
+                const r = onNodeCreated ? onNodeCreated.apply(this, arguments) : undefined;
+
+                // Aggiungi widget di preview
+                const widget = ComfyWidgets["STRING"](this, "preview", ["STRING", { multiline: true }], app).widget;
+                widget.inputEl.readOnly = true;
+                widget.inputEl.style.opacity = 0.7;
+                widget.inputEl.style.fontSize = "10px";
+                widget.serializeValue = async () => undefined; // Non salvare nel workflow
+                
+                return r;
+            };
+
+            const onExecuted = nodeType.prototype.onExecuted;
+            nodeType.prototype.onExecuted = function(message) {
+                onExecuted?.apply(this, arguments);
+                if (message?.text) {
+                    const widget = this.widgets.find(w => w.name === "preview");
+                    if (widget) {
+                        widget.value = message.text[0];
+                    }
+                }
+            };
+        }
+    }
 };
 
 // Load settings before registering so the settings panel is populated.

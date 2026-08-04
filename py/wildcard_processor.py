@@ -52,7 +52,7 @@ class WildcardProcessorNode:
         # Elabora il testo
         processed_text = self._process_text(text, random_gen)
 
-        return (processed_text,)
+        return {"ui": {"text": [processed_text]}, "result": (processed_text,)}
 
     def _process_text(self, text, random_gen):
         """
