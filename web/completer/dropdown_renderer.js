@@ -1,4 +1,4 @@
-import { $el } from "../../../scripts/ui.js";
+import { mkEl } from "../utils.js";
 import { TagCompleterSettings } from "./tag_completer_settings.js";
 
 // ==============================================
@@ -87,7 +87,7 @@ export class DropdownRenderer {
         if (!prefixes || prefixes.length === 0) return [];
 
         return prefixes.map(prefix => {
-            return $el("span.jupo-tagcomplete-prefix-badge", {
+            return mkEl("span.jupo-tagcomplete-prefix-badge", {
                 textContent: `${prefix}`
             });
         });
@@ -101,7 +101,7 @@ export class DropdownRenderer {
         if (!filters || filters.length === 0) return [];
 
         return filters.map(filter => {
-            return $el("span.jupo-tagcomplete-filter-badge", {
+            return mkEl("span.jupo-tagcomplete-filter-badge", {
                 textContent: `${filter.toUpperCase()}`
             });
         });
@@ -119,7 +119,7 @@ export class DropdownRenderer {
             ? "https://e621.net/wiki_pages/" 
             : "https://danbooru.donmai.us/wiki_pages/";
         
-        return $el("a.jupo-tagcomplete-wikiLink", {
+        return mkEl("a.jupo-tagcomplete-wikiLink", {
             textContent: "🔍", 
             title: "Open external wiki page for this tag.", 
             href: baseUrl + linkPart, 
@@ -138,10 +138,10 @@ export class DropdownRenderer {
         const regex = new RegExp(`(${safeTerm})`, "gi");
         const splitText = result.text.split(regex);
 
-        const container = $el("div.jupo-tagcomplete-text");
+        const container = mkEl("div.jupo-tagcomplete-text");
 
         splitText.forEach(part => {
-            const element = $el("span", { textContent: part });
+            const element = mkEl("span", { textContent: part });
 
             if (part.toLowerCase() === inputTerm.toLowerCase()) {
                 element.classList.add("jupo-tagcomplete-highlight");
@@ -188,7 +188,7 @@ export class DropdownRenderer {
     // ピル
     // ------------------------------------------
     createPill(text) {
-        return $el("span.jupo-tagcomplete-pill", { textContent: text });
+        return mkEl("span.jupo-tagcomplete-pill", { textContent: text });
     }
 
     applyCategoryColor(element, result) {
@@ -206,7 +206,7 @@ export class DropdownRenderer {
     // 各行のアイテムを作成
     // ------------------------------------------
     createDropdownItem(result, searchInfo, parts, onItemClick) {
-        const item = $el("div.jupo-tagcomplete-item", {
+        const item = mkEl("div.jupo-tagcomplete-item", {
             onclick: (e) => onItemClick(e, result, searchInfo),
             "data-category": result.categoryName || null
         }, parts);

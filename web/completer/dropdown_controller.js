@@ -1,4 +1,4 @@
-import { $el } from "../../../scripts/ui.js";
+import { mkEl } from "../utils.js";
 import { TagCompleterSettings } from "./tag_completer_settings.js";
 
 // ==============================================
@@ -10,7 +10,7 @@ export class DropdownController {
         this.settings = TagCompleterSettings;
 
         this.textareaElement = textareaElement;
-        this.dropdown = $el("div.jupo-tagcomplete");
+        this.dropdown = mkEl("div.jupo-tagcomplete");
         this.items = null;
         this.currentIndex = 0;
         this.isMousedownOnDropdown = false;

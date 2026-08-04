@@ -1,4 +1,4 @@
-import { $el } from "../../../scripts/ui.js";
+import { mkEl } from "../utils.js";
 import { TagCompleterSettings } from "./tag_completer_settings.js";
 
 // ==============================================
@@ -10,11 +10,11 @@ export class VirtualDropdownController {
         this.settings = TagCompleterSettings;
         
         this.textareaElement = textareaElement;
-        this.dropdown = $el("div.jupo-tagcomplete");
-        this.viewport = $el("div.jupo-tagcomplete-viewport");
-        this.container = $el("div.jupo-tagcomplete-container");
-        this.paddingTop = $el("div.jupo-tagcomplete-padding-top");
-        this.paddingBottom = $el("div.jupo-tagcomplete-padding-bottom");
+        this.dropdown = mkEl("div.jupo-tagcomplete");
+        this.viewport = mkEl("div.jupo-tagcomplete-viewport");
+        this.container = mkEl("div.jupo-tagcomplete-container");
+        this.paddingTop = mkEl("div.jupo-tagcomplete-padding-top");
+        this.paddingBottom = mkEl("div.jupo-tagcomplete-padding-bottom");
         
         // 仮想スクロール設定
         this.itemHeight = 40; // 各アイテムの固定高さ

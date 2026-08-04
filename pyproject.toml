@@ -1,9 +1,9 @@
 [project]
 name = "comfy-tagcomplete"
 description = "Tag completer with wildcard sub-selection and CSV file support"
-version = "2.0.0"
+version = "2.1.1"
 license = {file = "LICENSE"}
-dependencies = ["sqlite3"]
+dependencies = []
 
 [project.urls]
 Repository = "https://github.com/huchukato/comfy-tagcomplete"

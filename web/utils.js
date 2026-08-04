@@ -26,6 +26,70 @@ export async function api_post(url, options = {}, { signal } = {}) {
     return await res.json();
 }
 
+// Create DOM elements with a $el-like API.
+// tag: "div.class1.class2" or "span"
+// attrs: { textContent, onclick, href, ...attributes }
+// children: single Element | string | array of (Element | string)
+export function mkEl(tag, attrs = {}, children = []) {
+    const [tagName, ...classes] = tag.split(".");
+    const el = document.createElement(tagName);
+
+    if (classes.length) {
+        el.className = classes.join(" ");
+    }
+
+    const isEvent = (key) => key.startsWith("on") && key.length > 2;
+    const isAttr = (key) => !isEvent(key) && key !== "textContent";
+
+    for (const [key, value] of Object.entries(attrs)) {
+        if (value === undefined || value === null) continue;
+
+        if (key === "textContent") {
+            el.textContent = value;
+        } else if (isEvent(key)) {
+            const event = key.slice(2).toLowerCase();
+            el.addEventListener(event, value);
+        } else if (isAttr(key)) {
+            el.setAttribute(key, String(value));
+        }
+    }
+
+    const append = (child) => {
+        if (child == null) return;
+        if (child instanceof Element || child instanceof DocumentFragment) {
+            el.appendChild(child);
+        } else if (Array.isArray(child)) {
+            child.forEach(append);
+        } else {
+            el.appendChild(document.createTextNode(String(child)));
+        }
+    };
+
+    const childArray = Array.isArray(children) ? children : [children];
+    childArray.forEach(append);
+
+    return el;
+}
+
+// Resolve the actual editable textarea/input element from a Comfy widget,
+// supporting both legacy (inputEl) and Vue/Modern (element) frontends.
+export function findTextareaFromWidget(widget) {
+    if (!widget) return null;
+
+    const candidates = [widget.inputEl, widget.element].filter(Boolean);
+    for (const candidate of candidates) {
+        if (candidate instanceof HTMLTextAreaElement || candidate instanceof HTMLInputElement) {
+            if (!candidate.disabled && candidate.type !== "hidden") {
+                return candidate;
+            }
+        }
+        const inner = candidate.querySelector?.("textarea:not([readonly]):not([disabled]), input:not([readonly]):not([disabled])");
+        if (inner) return inner;
+    }
+
+    return null;
+}
+
 export function loadCSS(path, options = {}) {
     try {
         const { preventDuplicates = true, onLoad, onError } = options;

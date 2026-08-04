@@ -73,7 +73,7 @@ export class TagCompleter {
 
     // --- コンポーネントを初期化 ---
     initializeComponents() {
-        this.helper = new TextAreaCaretHelper(this.element, () => app.canvas.ds.scale);
+        this.helper = new TextAreaCaretHelper(this.element, () => app.canvas?.ds?.scale ?? 1);
         this.searchEngine = new SearchEngine();
         this.dropdownRenderer = new DropdownRenderer();
         this.keyboardHandler = new KeyboardHandler();
