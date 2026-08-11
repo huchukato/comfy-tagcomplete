@@ -125,7 +125,7 @@ class WildcardProcessorNode:
         """
         Trova quantificatori di wildcards nel formato num__keyword__.
         """
-        pattern = r'(?P<full_match>(?P<quantifier>\d+)#__(?P<keyword>[\w.\-+/\\]+?)__)'
+        pattern = r'(?P<full_match>(?P<quantifier>\d+)#__(?P<keyword>[\w.\-+/\\*]+?)__)'
         matches = re.finditer(pattern, text, re.IGNORECASE)
 
         result = []
@@ -227,7 +227,7 @@ class WildcardProcessorNode:
         """
         Sostituisce wildcards nel formato __keyword__.
         """
-        pattern = r"__([\w.\-+/\\]+?)__"
+        pattern = r"__([\w.\-+/\\*]+?)__"
         matches = re.findall(pattern, string)
 
         replacements_found = False
