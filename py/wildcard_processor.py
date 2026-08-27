@@ -19,7 +19,8 @@ class WildcardProcessorNode:
             },
             "optional": {
                 "seed": (IO.INT, {"default": 0, "min": 0, "max": 0xffffffffffffffff, "tooltip": "Seed for randomization (0 = random)"}),
-                "populate": (IO.BOOLEAN, {"default": True, "tooltip": "If True, process wildcards. If False, return the text unchanged."}),
+                "populate": (IO.BOOLEAN, {"default": True, "tooltip": "If True, process wildcards. If False, return populated_text unchanged."}),
+                "populated_text": (IO.STRING, {"default": "", "multiline": True, "tooltip": "Paste here a previously populated prompt to reuse it when populate is False."}),
             }
         }
 
@@ -28,23 +29,24 @@ class WildcardProcessorNode:
     FUNCTION = "process_wildcards"
     CATEGORY = "ComfyUI-TagComplete"
 
-    def process_wildcards(self, text, seed=0, populate=True):
+    def process_wildcards(self, text, seed=0, populate=True, populated_text=""):
         """
         Processa wildcards e dynamic prompts nel testo.
 
         Args:
             text: Testo contenente wildcards nel formato __keyword__
             seed: Seed per la randomizzazione (0 = random)
-            populate: Se True, processa le wildcard; se False, restituisce il testo invariato
+            populate: Se True, processa le wildcard; se False, restituisce populated_text
+            populated_text: Testo già popolato da riutilizzare quando populate è False
 
         Returns:
-            Testo elaborato con wildcards sostituiti, oppure il testo originale
+            Testo elaborato con wildcards sostituiti, oppure il testo popolato precedentemente
         """
         # Assicura che le wildcards siano caricate
         WildcardLoader.load()
 
         if not populate:
-            return {"ui": {"text": [text]}, "result": (text,)}
+            return {"ui": {"text": [populated_text]}, "result": (populated_text,)}
 
         if seed == 0:
             # Usa un seed casuale se non specificato
