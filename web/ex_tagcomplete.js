@@ -78,7 +78,22 @@ const extension = {
                 widget.inputEl.style.opacity = 0.7;
                 widget.inputEl.style.fontSize = "10px";
                 widget.serializeValue = async () => undefined; // Non salvare nel workflow
-                
+
+                // Disabilita populated_text quando populate è attivo
+                const populateWidget = this.widgets.find(w => w.name === "populate");
+                const populatedTextWidget = this.widgets.find(w => w.name === "populated_text");
+                if (populateWidget && populatedTextWidget) {
+                    const updateDisabled = () => {
+                        populatedTextWidget.inputEl.disabled = populateWidget.value;
+                    };
+                    const originalCallback = populateWidget.callback;
+                    populateWidget.callback = function(value) {
+                        if (originalCallback) originalCallback.call(this, value);
+                        updateDisabled();
+                    };
+                    updateDisabled();
+                }
+
                 return r;
             };
 
@@ -86,9 +101,19 @@ const extension = {
             nodeType.prototype.onExecuted = function(message) {
                 onExecuted?.apply(this, arguments);
                 if (message?.text) {
+                    const text = message.text[0];
+
                     const widget = this.widgets.find(w => w.name === "preview");
                     if (widget) {
-                        widget.value = message.text[0];
+                        widget.value = text;
+                    }
+
+                    // In modalità populate, salva il testo popolato in populated_text
+                    // così può essere memorizzato nel workflow e riutilizzato con populate=False
+                    const populateWidget = this.widgets.find(w => w.name === "populate");
+                    const populatedTextWidget = this.widgets.find(w => w.name === "populated_text");
+                    if (populateWidget?.value && populatedTextWidget) {
+                        populatedTextWidget.value = text;
                     }
                 }
             };
