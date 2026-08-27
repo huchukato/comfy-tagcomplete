@@ -19,6 +19,7 @@ class WildcardProcessorNode:
             },
             "optional": {
                 "seed": (IO.INT, {"default": 0, "min": 0, "max": 0xffffffffffffffff, "tooltip": "Seed for randomization (0 = random)"}),
+                "populate": (IO.BOOLEAN, {"default": True, "tooltip": "If True, process wildcards. If False, return the text unchanged."}),
             }
         }
 
@@ -27,20 +28,24 @@ class WildcardProcessorNode:
     FUNCTION = "process_wildcards"
     CATEGORY = "ComfyUI-TagComplete"
 
-    def process_wildcards(self, text, seed=0):
+    def process_wildcards(self, text, seed=0, populate=True):
         """
         Processa wildcards e dynamic prompts nel testo.
 
         Args:
             text: Testo contenente wildcards nel formato __keyword__
             seed: Seed per la randomizzazione (0 = random)
+            populate: Se True, processa le wildcard; se False, restituisce il testo invariato
 
         Returns:
-            Testo elaborato con wildcards sostituiti
+            Testo elaborato con wildcards sostituiti, oppure il testo originale
         """
         # Assicura che le wildcards siano caricate
         WildcardLoader.load()
-        
+
+        if not populate:
+            return {"ui": {"text": [text]}, "result": (text,)}
+
         if seed == 0:
             # Usa un seed casuale se non specificato
             seed = random.randint(0, 0xffffffffffffffff)
