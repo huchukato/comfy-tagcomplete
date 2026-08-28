@@ -1,0 +1,12 @@
+[anime] 2D-animated, cel-shaded, vibrant anime color palette, clean lineart, anime-style lighting
+[photorealistic] Live-action, cinematic photorealism, natural skin textures, realistic lighting, shallow depth of field
+[3dcg] 3D CG rendered, subsurface scattering, physically based rendering, cinematic 3D animation
+[cartoon] 2D cartoon, bold outlines, flat colors, exaggerated expressions, cartoon-style animation
+[claymation] Claymation, stop-motion clay texture, handcrafted look, visible fingerprints, studio lighting
+[watercolor] Watercolor painting style, soft bleeding pigments, paper texture, hand-painted aesthetic
+[vintage] Vintage film, 35mm grain, muted colors, halation, film scratches, analog warmth
+[noir] Film noir, high-contrast black and white, harsh shadows, venetian blind light, moody atmosphere
+[cyberpunk] Cyberpunk, neon-lit, holographic displays, rainy night, chrome reflections, magenta-cyan palette
+[fantasy] Fantasy, ethereal lighting, magical particles, painterly atmosphere, mystical glow
+[softfocus] Soft focus, dreamy diffusion, bloom, pastel palette, romantic atmosphere
+[hentai] 2D-animated hentai, cel-shaded, explicit anime style, clean lineart, anime-style lighting
