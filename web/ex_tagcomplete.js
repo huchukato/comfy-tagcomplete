@@ -85,6 +85,7 @@ const extension = {
                 if (populateWidget && populatedTextWidget) {
                     const updateVisibility = () => {
                         const populated = populateWidget.value;
+                        if (!populatedTextWidget.inputEl) return;
                         populatedTextWidget.inputEl.disabled = populated;
                         // Nasconde il widget populated_text quando populate è attivo
                         // per evitare confusione con il campo preview
@@ -108,11 +109,13 @@ const extension = {
                 const textWidget = this.widgets.find(w => w.name === "text");
                 const refreshWidget = this.widgets.find(w => w.name === "refresh_token");
                 if (textWidget && refreshWidget) {
-                    // Nascondi refresh_token dall'UI
-                    refreshWidget.inputEl.style.display = "none";
-                    const refreshLabel = refreshWidget.inputEl.previousElementSibling;
-                    if (refreshLabel && refreshLabel.tagName === "LABEL") {
-                        refreshLabel.style.display = "none";
+                    // Nascondi refresh_token dall'UI (con null check per workflow vecchi)
+                    if (refreshWidget.inputEl) {
+                        refreshWidget.inputEl.style.display = "none";
+                        const refreshLabel = refreshWidget.inputEl.previousElementSibling;
+                        if (refreshLabel && refreshLabel.tagName === "LABEL") {
+                            refreshLabel.style.display = "none";
+                        }
                     }
 
                     // Callback originale del text widget
