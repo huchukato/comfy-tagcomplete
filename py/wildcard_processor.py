@@ -9,7 +9,15 @@ class WildcardProcessorNode:
     Nodo ComfyUI per il processing di wildcards e dynamic prompts,
     ispirato alla logica di ImpactWildcardEncode ma integrato con
     il sistema di ComfyUI-TagComplete.
+
+    Include una cache di sessione che applica un "downvote" progressivo
+    alle opzioni già utilizzate, riducendo la probabilità di ripetizioni
+    nella stessa sessione di ComfyUI.
     """
+
+    # Cache di sessione: {keyword: {option: usage_count}}
+    # Si resetta al restart di ComfyUI (variabile di classe).
+    _session_usage: dict[str, dict[str, int]] = {}
 
     @classmethod
     def INPUT_TYPES(s) -> InputTypeDict:
@@ -21,6 +29,8 @@ class WildcardProcessorNode:
                 "seed": (IO.INT, {"default": 0, "min": 0, "max": 0xffffffffffffffff, "tooltip": "Seed for randomization (0 = random)"}),
                 "populate": (IO.BOOLEAN, {"default": True, "tooltip": "If True, process wildcards. If False, return populated_text unchanged."}),
                 "populated_text": (IO.STRING, {"default": "", "multiline": True, "tooltip": "Paste here a previously populated prompt to reuse it when populate is False."}),
+                "deduplicate": (IO.BOOLEAN, {"default": True, "tooltip": "If True, options already used in this session get a probability penalty (downvote), reducing repeats."}),
+                "downvote_factor": (IO.FLOAT, {"default": 0.5, "min": 0.01, "max": 1.0, "step": 0.05, "tooltip": "Penalty multiplier applied each time an option is used. 0.5 = halved probability each use. 1.0 = no penalty (same as deduplicate=False)."}),
             }
         }
 
@@ -29,7 +39,7 @@ class WildcardProcessorNode:
     FUNCTION = "process_wildcards"
     CATEGORY = "ComfyUI-TagComplete"
 
-    def process_wildcards(self, text, seed=0, populate=True, populated_text=""):
+    def process_wildcards(self, text, seed=0, populate=True, populated_text="", deduplicate=True, downvote_factor=0.5):
         """
         Processa wildcards e dynamic prompts nel testo.
 
@@ -38,6 +48,8 @@ class WildcardProcessorNode:
             seed: Seed per la randomizzazione (0 = random)
             populate: Se True, processa le wildcard; se False, restituisce populated_text
             populated_text: Testo già popolato da riutilizzare quando populate è False
+            deduplicate: Se True, le opzioni già usate in sessione subiscono un downvote di probabilità
+            downvote_factor: Moltiplicatore di penalità per opzioni già usate (0.5 = dimezza ogni uso)
 
         Returns:
             Testo elaborato con wildcards sostituiti, oppure il testo popolato precedentemente
@@ -61,12 +73,20 @@ class WildcardProcessorNode:
         random.seed(seed)
         random_gen = np.random.default_rng(seed)
 
+        # Prepara il contesto di deduplicazione
+        dedup_ctx = None
+        if deduplicate and downvote_factor < 1.0:
+            dedup_ctx = {
+                'factor': downvote_factor,
+                'usage': self._session_usage,
+            }
+
         # Elabora il testo
-        processed_text = self._process_text(text, random_gen)
+        processed_text = self._process_text(text, random_gen, dedup_ctx)
 
         return {"ui": {"text": [processed_text]}, "result": (processed_text,)}
 
-    def _process_text(self, text, random_gen):
+    def _process_text(self, text, random_gen, dedup_ctx=None):
         """
         Elabora il testo sostituendo wildcards e opzioni multiple.
         """
@@ -97,12 +117,12 @@ class WildcardProcessorNode:
                 text = text.replace(match['full_match'], replacement)
 
             # pass1: replace options - ciclo continuo come Impact Pack
-            text, replacements_found_1 = self._replace_options(text, random_gen)
+            text, replacements_found_1 = self._replace_options(text, random_gen, dedup_ctx)
             while replacements_found_1:
-                text, replacements_found_1 = self._replace_options(text, random_gen)
+                text, replacements_found_1 = self._replace_options(text, random_gen, dedup_ctx)
 
             # pass2: replace wildcards
-            text, replacements_found_2 = self._replace_wildcards(text, random_gen)
+            text, replacements_found_2 = self._replace_wildcards(text, random_gen, dedup_ctx)
 
             # Se non ci sono più sostituzioni E il testo non è cambiato, ferma il ciclo
             if not replacements_found_2 and text == original_text:
@@ -150,7 +170,7 @@ class WildcardProcessorNode:
 
         return result
 
-    def _replace_options(self, string, random_gen):
+    def _replace_options(self, string, random_gen, dedup_ctx=None):
         """
         Sostituisce opzioni multiple nel formato {opzione1|opzione2|opzione3}.
         """
@@ -199,8 +219,20 @@ class WildcardProcessorNode:
                 else:
                     config_value = 1
 
+                # Applica downvote di sessione se attivo
+                if dedup_ctx:
+                    clean_opt = re.sub(r'^\s*[0-9.]+::', '', str(option), count=1).strip()
+                    usage_count = dedup_ctx['usage'].get('__options__', {}).get(clean_opt, 0)
+                    if usage_count > 0:
+                        config_value *= dedup_ctx['factor'] ** usage_count
+
                 adjusted_probabilities.append(config_value)
                 total_prob += config_value
+
+            # Evita divisione per zero
+            if total_prob <= 0:
+                total_prob = len(options)
+                adjusted_probabilities = [1.0] * len(options)
 
             normalized_probabilities = [prob / total_prob for prob in adjusted_probabilities]
 
@@ -222,6 +254,14 @@ class WildcardProcessorNode:
             selected_items2 = [re.sub(r'^\s*[0-9.]+::', '', str(x), count=1) for x in selected_items]
             replacement = select_sep.join(selected_items2)
 
+            # Registra uso in sessione
+            if dedup_ctx:
+                for item in selected_items2:
+                    clean = str(item).strip()
+                    if '__options__' not in dedup_ctx['usage']:
+                        dedup_ctx['usage']['__options__'] = {}
+                    dedup_ctx['usage']['__options__'][clean] = dedup_ctx['usage']['__options__'].get(clean, 0) + 1
+
             replacements_found = True
             return replacement
 
@@ -235,7 +275,7 @@ class WildcardProcessorNode:
 
         return replaced_string, replacements_found
 
-    def _replace_wildcards(self, string, random_gen):
+    def _replace_wildcards(self, string, random_gen, dedup_ctx=None):
         """
         Sostituisce wildcards nel formato __keyword__.
         """
@@ -266,14 +306,33 @@ class WildcardProcessorNode:
                     else:
                         config_value = 1
 
+                    # Applica downvote di sessione se attivo
+                    if dedup_ctx:
+                        clean_opt = re.sub(r'^\s*[0-9.]+::', '', str(option), count=1).strip()
+                        usage_count = dedup_ctx['usage'].get(keyword, {}).get(clean_opt, 0)
+                        if usage_count > 0:
+                            config_value *= dedup_ctx['factor'] ** usage_count
+
                     adjusted_probabilities.append(config_value)
                     total_prob += config_value
+
+                # Evita divisione per zero
+                if total_prob <= 0:
+                    total_prob = len(options)
+                    adjusted_probabilities = [1.0] * len(options)
 
                 normalized_probabilities = [prob / total_prob for prob in adjusted_probabilities]
 
                 # Seleziona un'opzione
                 selected_item = random_gen.choice(options, p=normalized_probabilities, replace=False)
                 replacement = re.sub(r'^\s*[0-9.]+::', '', str(selected_item), count=1)
+
+                # Registra uso in sessione
+                if dedup_ctx:
+                    clean = str(replacement).strip()
+                    if keyword not in dedup_ctx['usage']:
+                        dedup_ctx['usage'][keyword] = {}
+                    dedup_ctx['usage'][keyword][clean] = dedup_ctx['usage'][keyword].get(clean, 0) + 1
 
                 replacements_found = True
                 string = string.replace(f"__{match}__", replacement, 1)
@@ -307,7 +366,33 @@ class WildcardProcessorNode:
                                 found = True
 
                 if found and total_patterns:
-                    replacement = random_gen.choice(total_patterns)
+                    # Applica downvote anche sui pattern con wildcard
+                    if dedup_ctx:
+                        weights = []
+                        for p in total_patterns:
+                            clean_p = re.sub(r'^\s*[0-9.]+::', '', str(p), count=1).strip()
+                            usage_count = dedup_ctx['usage'].get(keyword, {}).get(clean_p, 0)
+                            w = 1.0 * (dedup_ctx['factor'] ** usage_count) if usage_count > 0 else 1.0
+                            weights.append(w)
+                        total_w = sum(weights)
+                        if total_w <= 0:
+                            weights = [1.0] * len(total_patterns)
+                            total_w = len(total_patterns)
+                        norm_weights = [w / total_w for w in weights]
+                        idx = random_gen.choice(len(total_patterns), p=norm_weights)
+                        selected = total_patterns[idx]
+                    else:
+                        selected = random_gen.choice(total_patterns)
+
+                    replacement = re.sub(r'^\s*[0-9.]+::', '', str(selected), count=1)
+
+                    # Registra uso
+                    if dedup_ctx:
+                        clean = str(replacement).strip()
+                        if keyword not in dedup_ctx['usage']:
+                            dedup_ctx['usage'][keyword] = {}
+                        dedup_ctx['usage'][keyword][clean] = dedup_ctx['usage'][keyword].get(clean, 0) + 1
+
                     replacements_found = True
                     string = string.replace(f"__{match}__", replacement, 1)
 
@@ -351,6 +436,11 @@ class WildcardProcessorNode:
     def _wildcard_normalize(self, x):
         """Normalizza il nome del wildcard."""
         return x.replace("\\", "/").replace(' ', '-').lower()
+
+    @classmethod
+    def reset_session_cache(cls):
+        """Resetta la cache di sessione (downvote). Chiamabile esternamente."""
+        cls._session_usage.clear()
 
     def _is_numeric_string(self, s):
         """Verifica se una stringa rappresenta un numero."""
