@@ -79,19 +79,28 @@ const extension = {
                 widget.inputEl.style.fontSize = "10px";
                 widget.serializeValue = async () => undefined; // Non salvare nel workflow
 
-                // Disabilita populated_text quando populate è attivo
+                // Disabilita e nasconde populated_text quando populate è attivo
                 const populateWidget = this.widgets.find(w => w.name === "populate");
                 const populatedTextWidget = this.widgets.find(w => w.name === "populated_text");
                 if (populateWidget && populatedTextWidget) {
-                    const updateDisabled = () => {
-                        populatedTextWidget.inputEl.disabled = populateWidget.value;
+                    const updateVisibility = () => {
+                        const populated = populateWidget.value;
+                        populatedTextWidget.inputEl.disabled = populated;
+                        // Nasconde il widget populated_text quando populate è attivo
+                        // per evitare confusione con il campo preview
+                        populatedTextWidget.inputEl.style.display = populated ? "none" : "";
+                        // Nasconde anche la label
+                        const labelEl = populatedTextWidget.inputEl.previousElementSibling;
+                        if (labelEl && labelEl.tagName === "LABEL") {
+                            labelEl.style.display = populated ? "none" : "";
+                        }
                     };
                     const originalCallback = populateWidget.callback;
                     populateWidget.callback = function(value) {
                         if (originalCallback) originalCallback.call(this, value);
-                        updateDisabled();
+                        updateVisibility();
                     };
-                    updateDisabled();
+                    updateVisibility();
                 }
 
                 return r;

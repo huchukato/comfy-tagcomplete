@@ -42,8 +42,13 @@ class WildcardProcessorNode:
         Returns:
             Testo elaborato con wildcards sostituiti, oppure il testo popolato precedentemente
         """
-        # Assicura che le wildcards siano caricate
-        WildcardLoader.load()
+        # Assicura che le wildcards siano caricate.
+        # Force reload se la cache è vuota ma le directory esistono,
+        # per gestire il caso in cui le wildcards vengano aggiunte dopo il primo caricamento.
+        if not WildcardLoader.get_wildcards_dict():
+            WildcardLoader.load(force=True)
+        else:
+            WildcardLoader.load()
 
         if not populate:
             return {"ui": {"text": [populated_text]}, "result": (populated_text,)}

@@ -397,13 +397,22 @@ class TagDataManager:
     @classmethod
     def search(cls, term: str, category: list[str] = None):
         if not cls.enable or cls.conn is None: return []
-        
-        escaped_term = term.replace('_', '\\_').replace('%', '\\%')
+
+        # Per le wildcards: se il termine inizia con __, rimuovi i delimitatori
+        # e cerca solo il contenuto. Così __viewan trova __mbe/prmpt/imgcmpstn/viewangle__
+        # senza dover ricordare il percorso completo.
+        search_term = term
+        if search_term.startswith('__'):
+            search_term = search_term[2:]
+        if search_term.endswith('__') and len(search_term) > 2:
+            search_term = search_term[:-2]
+
+        escaped_term = search_term.replace('_', '\\_').replace('%', '\\%')
 
         # Restrict Alias
         if cls.restrictAlias:
             where_clause = "(postCount IS NULL OR postCount != 'Alias' OR (postCount = 'Alias' AND (term = ? OR translate = ?))) AND (term LIKE '%' || ? || '%' ESCAPE '\\' OR translate LIKE '%' || ? || '%' ESCAPE '\\')"
-            params = [term, term, escaped_term, escaped_term]
+            params = [search_term, search_term, escaped_term, escaped_term]
         else:
             where_clause = "(term LIKE '%' || ? || '%' ESCAPE '\\' OR translate LIKE '%' || ? || '%' ESCAPE '\\')"
             params = [escaped_term, escaped_term]
