@@ -104,53 +104,6 @@ const extension = {
                     updateVisibility();
                 }
 
-                // Fix caching: quando il text widget cambia, incrementa refresh_token
-                // per forzare ComfyUI a rieseguire il nodo
-                const textWidget = this.widgets.find(w => w.name === "text");
-                const refreshWidget = this.widgets.find(w => w.name === "refresh_token");
-                if (textWidget && refreshWidget) {
-                    // Nascondi refresh_token dall'UI completamente
-                    const hideRefresh = () => {
-                        if (refreshWidget.inputEl) {
-                            refreshWidget.inputEl.style.display = "none";
-                            const refreshLabel = refreshWidget.inputEl.previousElementSibling;
-                            if (refreshLabel && refreshLabel.tagName === "LABEL") {
-                                refreshLabel.style.display = "none";
-                            }
-                            // Nascondi anche il container
-                            if (refreshWidget.inputEl.parentElement) {
-                                refreshWidget.inputEl.parentElement.style.display = "none";
-                            }
-                        }
-                        // Forza altezza zero
-                        refreshWidget.computeSize = () => [0, -4];
-                    };
-                    hideRefresh();
-
-                    // Callback originale del text widget
-                    const originalTextCallback = textWidget.callback;
-                    let lastTextValue = textWidget.value;
-
-                    // Intercetta i cambiamenti del testo
-                    const checkTextChange = () => {
-                        if (textWidget.value !== lastTextValue) {
-                            lastTextValue = textWidget.value;
-                            refreshWidget.value = (refreshWidget.value || 0) + 1;
-                        }
-                    };
-
-                    // Aggancia sia al callback che all'input event
-                    textWidget.callback = function(value) {
-                        if (originalTextCallback) originalTextCallback.call(this, value);
-                        checkTextChange();
-                    };
-
-                    if (textWidget.inputEl) {
-                        textWidget.inputEl.addEventListener("input", checkTextChange);
-                        textWidget.inputEl.addEventListener("change", checkTextChange);
-                    }
-                }
-
                 return r;
             };
 
@@ -173,27 +126,6 @@ const extension = {
                         populatedTextWidget.value = text;
                     }
                 }
-            };
-
-            // Nascondi refresh_token anche quando si carica un workflow esistente
-            const onConfigure = nodeType.prototype.onConfigure;
-            nodeType.prototype.onConfigure = function() {
-                const r = onConfigure ? onConfigure.apply(this, arguments) : undefined;
-                const refreshWidget = this.widgets?.find(w => w.name === "refresh_token");
-                if (refreshWidget) {
-                    if (refreshWidget.inputEl) {
-                        refreshWidget.inputEl.style.display = "none";
-                        const refreshLabel = refreshWidget.inputEl.previousElementSibling;
-                        if (refreshLabel && refreshLabel.tagName === "LABEL") {
-                            refreshLabel.style.display = "none";
-                        }
-                        if (refreshWidget.inputEl.parentElement) {
-                            refreshWidget.inputEl.parentElement.style.display = "none";
-                        }
-                    }
-                    refreshWidget.computeSize = () => [0, -4];
-                }
-                return r;
             };
         }
     }

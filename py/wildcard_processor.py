@@ -31,7 +31,6 @@ class WildcardProcessorNode:
                 "populated_text": (IO.STRING, {"default": "", "multiline": True, "tooltip": "Paste here a previously populated prompt to reuse it when populate is False."}),
                 "deduplicate": (IO.BOOLEAN, {"default": True, "tooltip": "If True, options already used in this session get a probability penalty (downvote), reducing repeats."}),
                 "downvote_factor": (IO.FLOAT, {"default": 0.5, "min": 0.01, "max": 1.0, "step": 0.05, "tooltip": "Penalty multiplier applied each time an option is used. 0.5 = halved probability each use. 1.0 = no penalty (same as deduplicate=False)."}),
-                "refresh_token": (IO.INT, {"default": 0, "tooltip": "Internal: changes to force re-execution. Incremented by the UI when text changes."}),
             }
         }
 
@@ -40,7 +39,7 @@ class WildcardProcessorNode:
     FUNCTION = "process_wildcards"
     CATEGORY = "ComfyUI-TagComplete"
 
-    def process_wildcards(self, text, seed=0, populate=True, populated_text="", deduplicate=True, downvote_factor=0.5, refresh_token=0):
+    def process_wildcards(self, text, seed=0, populate=True, populated_text="", deduplicate=True, downvote_factor=0.5):
         """
         Processa wildcards e dynamic prompts nel testo.
 
