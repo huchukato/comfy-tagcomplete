@@ -1,3 +1,7 @@
+# Yuri base - posizioni e camera angles inline per varieta scena FF
+# Camera angles, espressioni e cum inline per varieta (non usare con imgcmp/exprssn)
+# Location gestita da __mbe/prmpt/lctns/rndmlctns__
+# Illuminazione gestita da __mbe/prmpt/light/rndmlight__
 yuri, full body, {seductive smile|naughty face}, {sideboob|underboob|underboob cutout|cleavage|cleavage cutout}, crotch rub, pillow humping, blush, pleasure, 
 yuri, full body, {seductive smile|naughty face}, {cleavage|cleavage cutout}, crotch rub, pillow humping, blush, open mouth, tongue out, saliva drip, saliva on breasts
 yuri, {from below|from side}, open mouth, orgasm face, looking at viewer, {sideboob|underboob|underboob cutout|cleavage|cleavage cutout}, crotch rub, pillow humping, blush, orgasm, pussy juice, pussy juice puddle
