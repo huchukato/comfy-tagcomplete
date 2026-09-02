@@ -109,14 +109,23 @@ const extension = {
                 const textWidget = this.widgets.find(w => w.name === "text");
                 const refreshWidget = this.widgets.find(w => w.name === "refresh_token");
                 if (textWidget && refreshWidget) {
-                    // Nascondi refresh_token dall'UI (con null check per workflow vecchi)
-                    if (refreshWidget.inputEl) {
-                        refreshWidget.inputEl.style.display = "none";
-                        const refreshLabel = refreshWidget.inputEl.previousElementSibling;
-                        if (refreshLabel && refreshLabel.tagName === "LABEL") {
-                            refreshLabel.style.display = "none";
+                    // Nascondi refresh_token dall'UI completamente
+                    const hideRefresh = () => {
+                        if (refreshWidget.inputEl) {
+                            refreshWidget.inputEl.style.display = "none";
+                            const refreshLabel = refreshWidget.inputEl.previousElementSibling;
+                            if (refreshLabel && refreshLabel.tagName === "LABEL") {
+                                refreshLabel.style.display = "none";
+                            }
+                            // Nascondi anche il container
+                            if (refreshWidget.inputEl.parentElement) {
+                                refreshWidget.inputEl.parentElement.style.display = "none";
+                            }
                         }
-                    }
+                        // Forza altezza zero
+                        refreshWidget.computeSize = () => [0, -4];
+                    };
+                    hideRefresh();
 
                     // Callback originale del text widget
                     const originalTextCallback = textWidget.callback;
@@ -164,6 +173,27 @@ const extension = {
                         populatedTextWidget.value = text;
                     }
                 }
+            };
+
+            // Nascondi refresh_token anche quando si carica un workflow esistente
+            const onConfigure = nodeType.prototype.onConfigure;
+            nodeType.prototype.onConfigure = function() {
+                const r = onConfigure ? onConfigure.apply(this, arguments) : undefined;
+                const refreshWidget = this.widgets?.find(w => w.name === "refresh_token");
+                if (refreshWidget) {
+                    if (refreshWidget.inputEl) {
+                        refreshWidget.inputEl.style.display = "none";
+                        const refreshLabel = refreshWidget.inputEl.previousElementSibling;
+                        if (refreshLabel && refreshLabel.tagName === "LABEL") {
+                            refreshLabel.style.display = "none";
+                        }
+                        if (refreshWidget.inputEl.parentElement) {
+                            refreshWidget.inputEl.parentElement.style.display = "none";
+                        }
+                    }
+                    refreshWidget.computeSize = () => [0, -4];
+                }
+                return r;
             };
         }
     }
