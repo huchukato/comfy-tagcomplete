@@ -9,7 +9,7 @@ All notable changes to ComfyUI-TagComplete will be documented in this file.
 - **NEW**: Type `__` → select wildcard → press Enter → auto-show options
 - **NEW**: Select option with arrow keys → press Enter → replace wildcard
 - **NEW**: ESC to keep wildcard and close options
-- **NEW**: Smart parsing for wildcards with complex paths (`__mbe/blwjob/blwjb__`)
+- **NEW**: Smart parsing for wildcards with complex paths (`__pmp/blwjob/blwjb__`)
 - **NEW**: Line-by-line option parsing from wildcard files
 - **NEW**: Text overflow handling with truncation and hover expansion
 - **NEW**: CSS styling for long wildcard options (max-width: 600px)

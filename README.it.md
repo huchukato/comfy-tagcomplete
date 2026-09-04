@@ -102,7 +102,7 @@ Il nodo WildcardProcessor si integra perfettamente nei tuoi workflow ComfyUI esi
 Questa versione risolve tutti i problemi con il **Wildcard Processor** e ripristina la piena compatibilità con l'Impact Pack:
 
 ### 🔧 Fix Critici
-- **Nested wildcard processing**: Risolto il processing delle wildcard annidate come `__mbe/prmpt/lctns/rndmlctns__`
+- **Nested wildcard processing**: Risolto il processing delle wildcard annidate come `__pmp/prmpt/lctns/rndmlctns__`
 - **Dynamic prompts**: Corretta elaborazione dei dynamic prompts `{__indoor__|__outdoor__|__special__}`
 - **Impact Pack compatibility**: Implementata la logica di processing dell'Impact Pack originale
 - **Pattern matching**: Aggiunto depth-agnostic pattern matching per trovare wildcard a qualsiasi profondità
@@ -115,7 +115,7 @@ Questa versione risolve tutti i problemi con il **Wildcard Processor** e riprist
 5. **ESC** → mantiene la wildcard inserita e chiude le opzioni
 
 ### 🌟 Caratteristiche
-- **Parsing intelligente**: Gestisce wildcard con percorsi complessi (es. `__mbe/blwjob/blwjb__`)
+- **Parsing intelligente**: Gestisce wildcard con percorsi complessi (es. `__pmp/blwjob/blwjb__`)
 - **Opzioni riga per riga**: Ogni riga nel file wildcard diventa un'opzione separata
 - **Gestione testo lungo**: Opzioni lunghe vengono troncate con espansione al passaggio del mouse
 - **Compatibilità totale**: Funziona con file wildcard e formati esistenti

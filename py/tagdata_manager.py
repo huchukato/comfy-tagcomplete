@@ -399,7 +399,7 @@ class TagDataManager:
         if not cls.enable or cls.conn is None: return []
 
         # Per le wildcards: se il termine inizia con __, rimuovi i delimitatori
-        # e cerca solo il contenuto. Così __viewan trova __mbe/prmpt/imgcmpstn/viewangle__
+        # e cerca solo il contenuto. Così __viewan trova __pmp/prmpt/imgcmpstn/viewangle__
         # senza dover ricordare il percorso completo.
         search_term = term
         if search_term.startswith('__'):

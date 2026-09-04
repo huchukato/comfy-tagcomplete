@@ -1,0 +1,17 @@
+# Z-Image-Turbo style presets - photography vocabulary per stile
+# Usa __pmp/prmpt/zimage_style__ nel prompt
+[photorealistic] shot on Fujifilm GFX100 II medium format camera, 85mm f/1.4 lens, shallow depth of field, Kodak Portra 400 tones, natural skin texture with visible pores, film grain, subsurface scattering
+[photorealistic] shot on Canon R5, 35mm prime, natural window light, Cinestill 800T tungsten halation glow, candid documentary realism, visible pores and fine skin texture
+[photorealistic] medium-format Hasselblad look, creamy bokeh, anamorphic lens flare, 2.39:1 crop, teal-and-orange grade, natural skin texture, subtle imperfections
+[photorealistic] shot on point-and-shoot film camera, analog film photograph, grainy texture, warm tonal shifts, slight vignette, vintage film stock, faded highlights, muted shadows
+[anime] anime artwork, studio anime key visual, cel-shaded, vibrant, highly detailed, emotional composition, clean lineart
+[anime] 1990s anime OVA style, crisp cel-shaded outlines, vintage-inspired color palette, grainy film texture, dramatic highlights, nostalgic shading
+[hentai] 2D-animated hentai illustration, cel-shaded, explicit anime style, clean lineart, vibrant, highly detailed
+[3dcg] 3D CG render, octane render, subsurface scattering, realistic materials, physically based rendering
+[cartoon] western cartoon style, bold inked outlines, flat vivid colors, dynamic heroic composition, halftone shading
+[watercolor] watercolor painting, loose brushwork, pigment pooling, soft paper grain, vibrant painterly textural
+[cyberpunk] neon-drenched cyberpunk, rain-soaked streets, glowing signage, reflective surfaces, electric atmosphere, holograms
+[noir] film noir, black-and-white, strong contrast, moody directional shadows, 1940s mood, deep blacks, mysterious cinematic lighting
+[ghibli] whimsical hand-painted fantasy, gentle storytelling atmosphere, soft painterly lighting, warm palettes, lush environmental detail
+[manga] black-and-white manga illustration, strong inking, screen-tone shading, stylized expressions, dynamic motion lines, panel-style contrast
+[comics] western comic book style, strong inked outlines, bold graphic look, halftone shading, vivid flat colors

@@ -117,7 +117,7 @@ This version introduces **a1111-sd-webui-tagcomplete style wildcard sub-selectio
 5. **ESC** → keeps inserted wildcard and closes options
 
 ### 🌟 Features
-- **Smart parsing**: Handles wildcards with complex paths (e.g., `__mbe/blwjob/blwjb__`)
+- **Smart parsing**: Handles wildcards with complex paths (e.g., `__pmp/blwjob/blwjb__`)
 - **Line-by-line options**: Each line in wildcard file becomes a separate option
 - **Text overflow handling**: Long options are truncated with hover expansion
 - **Full compatibility**: Works with existing wildcard files and formats
@@ -226,7 +226,7 @@ Multiple prefixes can be set.
 ## 📋 Changelog
 
 ### v2.1.1 - Critical Wildcard Processor Fixes
-- **Fixed nested wildcard processing** - Now properly processes wildcards like `__mbe/prmpt/lctns/rndmlctns__`
+- **Fixed nested wildcard processing** - Now properly processes wildcards like `__pmp/prmpt/lctns/rndmlctns__`
 - **Fixed dynamic prompts** - Correctly handles `{__indoor__|__outdoor__|__special__}` with nested wildcards
 - **Impact Pack compatibility** - Implemented original Impact Pack processing logic
 - **Pattern matching** - Added depth-agnostic wildcard pattern matching
