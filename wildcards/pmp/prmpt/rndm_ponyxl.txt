@@ -1,0 +1,1 @@
+score_9, score_8_up, score_7_up, __pmp/prmpt/imgcmp/shots__, __pmp/prmpt/lctns/rndmlctns__, __pmp/prmpt/light/rndmlight__, __pmp/prmpt/char/rndmcharlb__, __pmp/prmpt/clths/rndmclth__, __pmp/prmpt/actsolo/brstplng.txt

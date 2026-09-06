@@ -1,0 +1,1 @@
+__pmp/prmpt/light/time__, __pmp/prmpt/light/type__, __pmp/prmpt/light/direction__, __pmp/prmpt/light/dark__
