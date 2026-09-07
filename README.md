@@ -1,5 +1,9 @@
 # ComfyUI-TagComplete
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/huchukato/ComfyUI-TagForge/main/banner.png" alt="ComfyUI-TagForge Banner" width="100%" />
+</p>
+
 [![ComfyUI](https://img.shields.io/badge/ComfyUI-Extension-blue?logo=comfyui&style=for-the-badge)](https://github.com/comfyanonymous/ComfyUI)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-2.1.1-orange?style=for-the-badge)](https://github.com/huchukato/comfy-tagcomplete/releases)
