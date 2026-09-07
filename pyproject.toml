@@ -1,6 +1,6 @@
 [project]
 name = "ComfyUI-TagForge"
-description = "Tag completer with wildcard sub-selection and CSV file support"
+description = "Tag completion with a1111-style wildcard sub-selection, CSV database support (Danbooru, e621), multiple wildcard sources, and smart parsing for professional prompt engineering in ComfyUI."
 version = "2.1.2"
 license = {file = "LICENSE"}
 dependencies = []
