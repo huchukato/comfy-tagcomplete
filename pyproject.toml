@@ -6,7 +6,7 @@ license = {file = "LICENSE"}
 dependencies = []
 
 [project.urls]
-Repository = "https://github.com/huchukato/ComfyUI-TagComplete"
+Repository = "https://github.com/huchukato/ComfyUI-TagForge"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
