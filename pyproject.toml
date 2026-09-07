@@ -1,5 +1,5 @@
 [project]
-name = "ComfyUI-TagComplete"
+name = "ComfyUI-TagForge"
 description = "Tag completer with wildcard sub-selection and CSV file support"
 version = "2.1.1"
 license = {file = "LICENSE"}
@@ -11,5 +11,5 @@ Repository = "https://github.com/huchukato/ComfyUI-TagComplete"
 
 [tool.comfy]
 PublisherId = "huchukato"
-DisplayName = "ComfyUI-TagComplete"
+DisplayName = "ComfyUI-TagForge"
 Icon = ""
