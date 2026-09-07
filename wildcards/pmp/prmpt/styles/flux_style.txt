@@ -1,5 +1,5 @@
 # Flux.1-dev style presets - photography vocabulary per stile
-# Usa __pmp/prmpt/flux_style__ nel prompt
+# Usa __pmp/prmpt/styles/flux_style__ nel prompt
 [photorealistic] shot on Fujifilm GFX100 II medium format camera, 85mm f/1.4 lens, shallow depth of field, Kodak Portra 400 tones, natural skin texture with visible pores, film grain, subsurface scattering
 [photorealistic] shot on Canon R5, 35mm prime, natural window light, Cinestill 800T tungsten halation glow, candid documentary realism, visible pores and fine skin texture
 [photorealistic] medium-format Hasselblad look, creamy bokeh, anamorphic lens flare, 2.39:1 crop, teal-and-orange grade, natural skin texture, subtle imperfections
