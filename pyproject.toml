@@ -1,12 +1,12 @@
 [project]
-name = "comfy-tagcomplete"
+name = "ComfyUI-TagComplete"
 description = "Tag completer with wildcard sub-selection and CSV file support"
 version = "2.1.1"
 license = {file = "LICENSE"}
 dependencies = []
 
 [project.urls]
-Repository = "https://github.com/huchukato/comfy-tagcomplete"
+Repository = "https://github.com/huchukato/ComfyUI-TagComplete"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
