@@ -1,5 +1,5 @@
 import { app } from "../../scripts/app.js";
-import { api_get, api_post, mkEl, findTextareaFromWidget } from "./utils.js";
+import { api_post } from "./utils.js";
 
 // ===============================================
 // TagForge Wildcard Processor – frontend helpers
@@ -18,73 +18,20 @@ const WILDCARD_MODE_PROP = "tagforge_wildcard_mode";
 const REPRODUCE_SEED_PROP = "tagforge_reproduce_seed";
 
 export const MODES = Object.freeze({
-    BACKEND: "backend",  // kept for backward compat with saved properties
     POPULATE: "populate",
     FIXED: "fixed",
     REPRODUCE: "reproduce",
 });
 
-const MODE_LABELS = {
-    [MODES.BACKEND]: "populate",
-    [MODES.POPULATE]: "populate",
-    [MODES.FIXED]: "fixed",
-    [MODES.REPRODUCE]: "reproduce",
-};
-
 const ENDPOINTS = {
-    list: "tagcomplete/wildcards/list",
-    status: "tagcomplete/wildcards/status",
-    refresh: "tagcomplete/wildcards/refresh",
     process: "tagcomplete/wildcards/process",
 };
 
-// Module-level caches so every toolbar shares the same data.
-let wildcardListCache = null;
-let wildcardStatusCache = null;
-let listPromise = null;
-let statusPromise = null;
 let queueHookInstalled = false;
 
 // =================================================
-// Low-level API wrappers (use mk_endpoint via utils)
+// API
 // =================================================
-
-export async function fetchWildcardList(signal) {
-    if (!listPromise) {
-        listPromise = api_get(ENDPOINTS.list, { signal })
-            .then((data) => {
-                wildcardListCache = data;
-                return data;
-            })
-            .finally(() => {
-                listPromise = null;
-            });
-    }
-    return listPromise;
-}
-
-export async function fetchWildcardStatus(signal) {
-    if (!statusPromise) {
-        statusPromise = api_get(ENDPOINTS.status, { signal })
-            .then((data) => {
-                wildcardStatusCache = data;
-                return data;
-            })
-            .finally(() => {
-                statusPromise = null;
-            });
-    }
-    return statusPromise;
-}
-
-export async function refreshWildcards(signal) {
-    wildcardListCache = null;
-    wildcardStatusCache = null;
-    listPromise = null;
-    statusPromise = null;
-    const data = await api_post(ENDPOINTS.refresh, {}, { signal });
-    return data;
-}
 
 export async function processWildcards(payload, signal) {
     return await api_post(ENDPOINTS.process, payload, { signal });
@@ -112,7 +59,7 @@ function isWildcardNode(node) {
 
 export function getMode(node) {
     const saved = node.properties?.[WILDCARD_MODE_PROP];
-    if (saved && saved !== MODES.BACKEND) return saved;
+    if (saved && saved !== "backend") return saved;
     const widgetMode = getWidgetByName(node, WIDGET_NAMES.mode)?.value;
     if (widgetMode === "legacy") return MODES.POPULATE;
     return widgetMode ?? MODES.POPULATE;
@@ -124,8 +71,6 @@ export function setMode(node, mode) {
     const modeWidget = getWidgetByName(node, WIDGET_NAMES.mode);
     if (modeWidget) modeWidget.value = mode;
     if (modeWidget?.callback) modeWidget.callback(mode);
-
-    updateModeLabel(node);
 }
 
 export function getReproduceSeed(node) {
@@ -145,219 +90,6 @@ export function captureReproduceSeed(node) {
 }
 
 // =================================================
-// Text insertion helpers (keeps TagCompleter alive)
-// =================================================
-
-function insertTextIntoWidget(widget, text) {
-    const textarea = findTextareaFromWidget(widget);
-    if (!textarea) return false;
-
-    const start = textarea.selectionStart ?? 0;
-    const end = textarea.selectionEnd ?? 0;
-
-    if (typeof textarea.setRangeText === "function") {
-        textarea.setRangeText(text, start, end, "end");
-    } else {
-        textarea.value =
-            textarea.value.slice(0, start) + text + textarea.value.slice(end);
-    }
-
-    const newPos = start + text.length;
-    textarea.selectionStart = newPos;
-    textarea.selectionEnd = newPos;
-
-    textarea.dispatchEvent(new Event("input", { bubbles: true }));
-    textarea.focus();
-    return true;
-}
-
-// =================================================
-// Toolbar UI
-// =================================================
-
-function parseWildcardName(item) {
-    if (typeof item === "string") return item;
-    if (item && typeof item === "object") {
-        return (
-            item.name || item.wildcard || item.value || String(item)
-        );
-    }
-    return "";
-}
-
-function getCachedList() {
-    if (!wildcardListCache) return [];
-    const list = Array.isArray(wildcardListCache)
-        ? wildcardListCache
-        : wildcardListCache.wildcards || wildcardListCache.data || [];
-    return list.map(parseWildcardName).filter(Boolean);
-}
-
-function statusToLabel(status) {
-    if (!status) return "wildcards: offline";
-    const count =
-        status.count ?? status.total ?? status.loaded ?? status.cached ?? 0;
-    if (status.ready === false || status.cached === 0) {
-        return "wildcards: empty";
-    }
-    return `wildcards: ${count}`;
-}
-
-function updateModeLabel(node) {
-    const toolbar = node?.__tagforge_toolbar;
-    if (!toolbar?.modeEl) return;
-    toolbar.modeEl.textContent = `mode: ${MODE_LABELS[getMode(node)]}`;
-}
-
-function updateAllToolbars() {
-    for (const node of getAllNodes(app)) {
-        if (!isWildcardNode(node)) continue;
-        const toolbar = node.__tagforge_toolbar;
-        if (toolbar) {
-            toolbar.loadOptions();
-            toolbar.updateStatus();
-        }
-    }
-}
-
-function createWildcardToolbar(node) {
-    const textWidget = getWidgetByName(node, WIDGET_NAMES.text);
-
-    const statusEl = mkEl("span.tagforge-wildcard-status", {
-        textContent: "wildcards: …",
-        style: "font-size:10px; opacity:0.9; white-space:nowrap;",
-    });
-
-    const modeEl = mkEl("span.tagforge-wildcard-mode", {
-        textContent: `mode: ${MODE_LABELS[getMode(node)]}`,
-        style: "font-size:10px; opacity:0.75; white-space:nowrap; min-width:70px;",
-    });
-
-    const select = mkEl("select.tagforge-wildcard-select", {
-        title: "Select a wildcard to insert",
-        style: "max-width:120px; min-width:80px; font-size:11px;",
-    });
-    select.appendChild(mkEl("option", { value: "", textContent: "-- wildcard --" }));
-
-    const insertBtn = mkEl("button.tagforge-wildcard-insert", {
-        textContent: "Insert",
-        title: "Insert __wildcard__ at cursor",
-        style: "font-size:11px; padding:1px 6px;",
-    });
-
-    const refreshBtn = mkEl("button.tagforge-wildcard-refresh", {
-        textContent: "↻",
-        title: "Refresh wildcard cache",
-        style: "font-size:11px; padding:1px 6px;",
-    });
-
-    const container = mkEl("div.tagforge-wildcard-toolbar", {
-        style: "display:flex; gap:4px; align-items:center; flex-wrap:wrap; padding:4px 0;",
-    }, [modeEl, statusEl, select, insertBtn, refreshBtn]);
-
-    const loadOptions = async () => {
-        select.innerHTML = "";
-        select.appendChild(
-            mkEl("option", { value: "", textContent: "-- wildcard --" })
-        );
-
-        try {
-            if (!wildcardListCache) {
-                await fetchWildcardList();
-            }
-            const names = getCachedList();
-            for (const name of names) {
-                select.appendChild(
-                    mkEl("option", { value: name, textContent: name })
-                );
-            }
-        } catch (error) {
-            console.warn("[TagForge] Failed to load wildcard list:", error);
-        }
-    };
-
-    const updateStatus = async () => {
-        try {
-            if (!wildcardStatusCache) {
-                await fetchWildcardStatus();
-            }
-            statusEl.textContent = statusToLabel(wildcardStatusCache);
-        } catch (error) {
-            statusEl.textContent = "wildcards: offline";
-        }
-    };
-
-    insertBtn.addEventListener("click", () => {
-        const name = select.value.trim();
-        if (!name || !textWidget) return;
-        const token = /^__.*__$/.test(name) ? name : `__${name}__`;
-        const inserted = insertTextIntoWidget(textWidget, token);
-        if (!inserted) {
-            console.warn("[TagForge] Could not find textarea for text widget");
-        }
-    });
-
-    refreshBtn.addEventListener("click", async () => {
-        statusEl.textContent = "wildcards: refreshing…";
-        try {
-            await refreshWildcards();
-            await loadOptions();
-            await updateStatus();
-        } catch (error) {
-            console.warn("[TagForge] Refresh failed:", error);
-            statusEl.textContent = "wildcards: offline";
-        }
-    });
-
-    const toolbarApi = {
-        container,
-        statusEl,
-        modeEl,
-        select,
-        loadOptions,
-        updateStatus,
-    };
-    node.__tagforge_toolbar = toolbarApi;
-
-    let widget;
-    if (typeof node.addDOMWidget === "function") {
-        widget = node.addDOMWidget(
-            "tagforge_wildcard_toolbar",
-            "custom",
-            container,
-            {
-                serialize: false,
-                getValue: () => "",
-                setValue: () => {},
-            }
-        );
-    } else {
-        widget = node.addWidget("custom", "tagforge_wildcard_toolbar", "", null, {
-            serialize: false,
-        });
-        widget.draw = function (_ctx, _node, _widgetWidth, y, _H) {
-            // Minimal fallback; real layout is handled by DOM widget.
-            return y;
-        };
-        widget.computeSize = function () {
-            return [200, 30];
-        };
-    }
-
-    if (widget) {
-        widget.options = widget.options || {};
-        widget.options.serialize = false;
-        widget.serialize = false;
-        widget.serializeValue = async () => undefined;
-    }
-
-    loadOptions();
-    updateStatus();
-
-    return toolbarApi;
-}
-
-// =================================================
 // Context-menu helpers
 // =================================================
 
@@ -371,17 +103,6 @@ export function buildWildcardNodeMenuItems(node) {
 
     return [
         { content: "TagForge Wildcards", disabled: true },
-        {
-            content: "Refresh wildcards",
-            callback: async () => {
-                try {
-                    await refreshWildcards();
-                    updateAllToolbars();
-                } catch (error) {
-                    console.warn("[TagForge] Refresh failed:", error);
-                }
-            },
-        },
         {
             content: "Mode",
             submenu: {
@@ -410,7 +131,6 @@ async function prepareWildcardNodes(appRef, _queueNodeIds) {
         if (!isWildcardNode(node)) continue;
 
         const mode = getMode(node);
-        if (mode === MODES.BACKEND) continue;
 
         const textWidget = getWidgetByName(node, WIDGET_NAMES.text);
         const seedWidget = getWidgetByName(node, WIDGET_NAMES.seed);
@@ -457,8 +177,6 @@ async function prepareWildcardNodes(appRef, _queueNodeIds) {
             if (processedText !== undefined && populatedTextWidget) {
                 populatedTextWidget.value = processedText;
             }
-            // Keep seed=0 random for POPULATE mode; only pin the returned seed
-            // when the user explicitly supplied one or is reproducing a result.
             if (mode === MODES.REPRODUCE && returnedSeed !== undefined) {
                 setReproduceSeed(node, returnedSeed);
             }
@@ -516,11 +234,10 @@ export function installQueueHook(appRef) {
 }
 
 // =================================================
-// Main node enhancement
+// Main node enhancement (no-op, kept for API compat)
 // =================================================
 
 export function enhanceWildcardProcessorNode(node) {
     if (node?.__tagforge_enhanced) return;
     node.__tagforge_enhanced = true;
-    // Toolbar removed — wildcard insertion is handled by tag autocomplete.
 }
