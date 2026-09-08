@@ -78,36 +78,29 @@ const extension = {
             nodeType.prototype.onNodeCreated = function() {
                 const r = onNodeCreated ? onNodeCreated.apply(this, arguments) : undefined;
 
-                // Aggiungi widget di preview
-                const widget = ComfyWidgets["STRING"](this, "preview", ["STRING", { multiline: true }], app).widget;
-                widget.inputEl.readOnly = true;
-                widget.inputEl.style.opacity = 0.7;
-                widget.inputEl.style.fontSize = "10px";
-                widget.serializeValue = async () => undefined; // Non salvare nel workflow
-
-                // Disabilita e nasconde populated_text quando populate è attivo
-                const populateWidget = this.widgets.find(w => w.name === "populate");
+                // Setup populated_text visibility based on mode
+                const modeWidget = this.widgets.find(w => w.name === "mode");
                 const populatedTextWidget = this.widgets.find(w => w.name === "populated_text");
-                if (populateWidget && populatedTextWidget) {
-                    const updateVisibility = () => {
-                        const populated = populateWidget.value;
+                if (modeWidget && populatedTextWidget) {
+                    const updatePopulatedVisibility = () => {
                         if (!populatedTextWidget.inputEl) return;
-                        populatedTextWidget.inputEl.disabled = populated;
-                        // Nasconde il widget populated_text quando populate è attivo
-                        // per evitare confusione con il campo preview
-                        populatedTextWidget.inputEl.style.display = populated ? "none" : "";
-                        // Nasconde anche la label
-                        const labelEl = populatedTextWidget.inputEl.previousElementSibling;
-                        if (labelEl && labelEl.tagName === "LABEL") {
-                            labelEl.style.display = populated ? "none" : "";
+                        const mode = modeWidget.value;
+                        if (mode === "populate") {
+                            // In populate mode: show as read-only (result appears after queue)
+                            populatedTextWidget.inputEl.readOnly = true;
+                            populatedTextWidget.inputEl.style.opacity = "0.7";
+                        } else {
+                            // In fixed/reproduce mode: editable
+                            populatedTextWidget.inputEl.readOnly = false;
+                            populatedTextWidget.inputEl.style.opacity = "1";
                         }
                     };
-                    const originalCallback = populateWidget.callback;
-                    populateWidget.callback = function(value) {
-                        if (originalCallback) originalCallback.call(this, value);
-                        updateVisibility();
+                    const originalModeCallback = modeWidget.callback;
+                    modeWidget.callback = function(value) {
+                        if (originalModeCallback) originalModeCallback.call(this, value);
+                        updatePopulatedVisibility();
                     };
-                    updateVisibility();
+                    updatePopulatedVisibility();
                 }
 
                 // Add the new wildcard toolbar and cache status label.
@@ -125,19 +118,13 @@ const extension = {
                 onExecuted?.apply(this, arguments);
                 if (message?.text) {
                     const text = message.text[0];
-
-                    const widget = this.widgets.find(w => w.name === "preview");
-                    if (widget) {
-                        widget.value = text;
-                        if (widget.inputEl) widget.inputEl.value = text;
-                    }
-
-                    // In modalità populate, salva il testo popolato in populated_text
-                    // così può essere memorizzato nel workflow e riutilizzato con populate=False
-                    const populateWidget = this.widgets.find(w => w.name === "populate");
+                    const modeWidget = this.widgets.find(w => w.name === "mode");
                     const populatedTextWidget = this.widgets.find(w => w.name === "populated_text");
-                    if (populateWidget?.value && populatedTextWidget) {
+
+                    // In populate mode, write the expanded result into populated_text
+                    if (populatedTextWidget && modeWidget?.value !== "fixed") {
                         populatedTextWidget.value = text;
+                        if (populatedTextWidget.inputEl) populatedTextWidget.inputEl.value = text;
                     }
                 }
             };

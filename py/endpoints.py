@@ -139,6 +139,8 @@ async def wildcard_status(req: web.Request):
 async def wildcard_process(req: web.Request):
     data = await req.json()
     text = data.get("text", "")
+    populated_text = data.get("populated_text", "")
+    mode = data.get("mode", "populate")
     if not isinstance(text, str):
         return web.json_response({"error": "text must be a string"}, status=400)
     try:
@@ -148,11 +150,14 @@ async def wildcard_process(req: web.Request):
         return web.json_response({"error": "seed and downvote_factor must be numeric"}, status=400)
     if not 0.0 < factor <= 1.0:
         return web.json_response({"error": "downvote_factor must be greater than 0 and at most 1"}, status=400)
+    if mode == "fixed":
+        return web.json_response({"processed_text": populated_text, "text": populated_text, "seed": seed})
+    source = populated_text if mode == "reproduce" else text
     if seed == 0:
         import secrets
         seed = secrets.randbits(64)
     usage = WildcardProcessorNode._session_usage if data.get("deduplicate", True) and factor < 1.0 else None
-    processed = WildcardLoader.process(text, seed, usage, factor)
+    processed = WildcardLoader.process(source, seed, usage, factor)
     return web.json_response({"processed_text": processed, "text": processed, "seed": seed})
 
 

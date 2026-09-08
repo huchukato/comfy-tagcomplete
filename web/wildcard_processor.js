@@ -8,7 +8,6 @@ import { api_get, api_post, mkEl, findTextareaFromWidget } from "./utils.js";
 const WIDGET_NAMES = {
     text: "text",
     seed: "seed",
-    populate: "populate",
     populatedText: "populated_text",
     deduplicate: "deduplicate",
     downvoteFactor: "downvote_factor",
@@ -19,14 +18,14 @@ const WILDCARD_MODE_PROP = "tagforge_wildcard_mode";
 const REPRODUCE_SEED_PROP = "tagforge_reproduce_seed";
 
 export const MODES = Object.freeze({
-    BACKEND: "backend",
+    BACKEND: "backend",  // kept for backward compat with saved properties
     POPULATE: "populate",
     FIXED: "fixed",
     REPRODUCE: "reproduce",
 });
 
 const MODE_LABELS = {
-    [MODES.BACKEND]: "backend",
+    [MODES.BACKEND]: "populate",
     [MODES.POPULATE]: "populate",
     [MODES.FIXED]: "fixed",
     [MODES.REPRODUCE]: "reproduce",
@@ -113,26 +112,18 @@ function isWildcardNode(node) {
 
 export function getMode(node) {
     const saved = node.properties?.[WILDCARD_MODE_PROP];
-    if (saved) return saved;
+    if (saved && saved !== MODES.BACKEND) return saved;
     const widgetMode = getWidgetByName(node, WIDGET_NAMES.mode)?.value;
-    return widgetMode === "legacy" ? MODES.BACKEND : (widgetMode ?? MODES.BACKEND);
+    if (widgetMode === "legacy") return MODES.POPULATE;
+    return widgetMode ?? MODES.POPULATE;
 }
 
 export function setMode(node, mode) {
     node.properties = node.properties || {};
     node.properties[WILDCARD_MODE_PROP] = mode;
     const modeWidget = getWidgetByName(node, WIDGET_NAMES.mode);
-    if (modeWidget) modeWidget.value = mode === MODES.BACKEND ? "legacy" : mode;
-
-    const populateWidget = getWidgetByName(node, WIDGET_NAMES.populate);
-    if (populateWidget) {
-        if (mode === MODES.POPULATE) {
-            populateWidget.value = true;
-        } else if (mode === MODES.FIXED || mode === MODES.REPRODUCE) {
-            populateWidget.value = false;
-        }
-        populateWidget.callback?.(populateWidget.value);
-    }
+    if (modeWidget) modeWidget.value = mode;
+    if (modeWidget?.callback) modeWidget.callback(mode);
 
     updateModeLabel(node);
 }
@@ -395,7 +386,6 @@ export function buildWildcardNodeMenuItems(node) {
             content: "Mode",
             submenu: {
                 options: [
-                    modeItem(MODES.BACKEND, "Backend (legacy)"),
                     modeItem(MODES.POPULATE, "Populate"),
                     modeItem(MODES.FIXED, "Fixed"),
                     modeItem(MODES.REPRODUCE, "Reproduce"),
@@ -424,7 +414,6 @@ async function prepareWildcardNodes(appRef, _queueNodeIds) {
 
         const textWidget = getWidgetByName(node, WIDGET_NAMES.text);
         const seedWidget = getWidgetByName(node, WIDGET_NAMES.seed);
-        const populateWidget = getWidgetByName(node, WIDGET_NAMES.populate);
         const populatedTextWidget = getWidgetByName(
             node,
             WIDGET_NAMES.populatedText
@@ -435,15 +424,10 @@ async function prepareWildcardNodes(appRef, _queueNodeIds) {
             WIDGET_NAMES.downvoteFactor
         );
 
-        // Remember original populate value so it can be restored after queuing.
-        if (populateWidget) {
-            node.__tagforge_original_populate = populateWidget.value;
-        }
         const modeWidget = getWidgetByName(node, WIDGET_NAMES.mode);
         if (modeWidget) node.__tagforge_original_mode = modeWidget.value;
 
         if (mode === MODES.FIXED) {
-            if (populateWidget) populateWidget.value = false;
             continue;
         }
 
@@ -458,7 +442,6 @@ async function prepareWildcardNodes(appRef, _queueNodeIds) {
         const payload = {
             text: textWidget?.value ?? "",
             seed: seed,
-            populate: true,
             populated_text: populatedTextWidget?.value ?? "",
             deduplicate: dedupWidget?.value ?? true,
             downvote_factor: factorWidget?.value ?? 0.5,
@@ -486,10 +469,7 @@ async function prepareWildcardNodes(appRef, _queueNodeIds) {
             ) {
                 seedWidget.value = returnedSeed;
             }
-            if (populateWidget) {
-                populateWidget.value = false;
-            }
-            if (modeWidget) modeWidget.value = "legacy";
+            if (modeWidget) modeWidget.value = mode;
         } catch (error) {
             console.error("[TagForge] Pre-queue wildcard processing failed:", error);
         }
@@ -499,17 +479,12 @@ async function prepareWildcardNodes(appRef, _queueNodeIds) {
 function restorePopulateFlags(appRef) {
     for (const node of getAllNodes(appRef)) {
         if (!isWildcardNode(node)) continue;
-        if (!("__tagforge_original_populate" in node)) continue;
+        if (!("__tagforge_original_mode" in node)) continue;
 
-        const populateWidget = getWidgetByName(node, WIDGET_NAMES.populate);
-        if (populateWidget) {
-            populateWidget.value = node.__tagforge_original_populate;
-        }
         const modeWidget = getWidgetByName(node, WIDGET_NAMES.mode);
-        if (modeWidget && "__tagforge_original_mode" in node) {
+        if (modeWidget) {
             modeWidget.value = node.__tagforge_original_mode;
         }
-        delete node.__tagforge_original_populate;
         delete node.__tagforge_original_mode;
     }
 }
