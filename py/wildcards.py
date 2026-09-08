@@ -1,449 +1,377 @@
-import folder_paths
-from pathlib import Path
 import configparser
+import fnmatch
+import math
 import os
-import yaml
-from . import paths
-import numpy as np
 import re
-from typing import List, Dict, Tuple, Optional, Any
+import threading
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
-# -----------------------------------------------
-# 以下のフォルダからワイルドカードを取得する
-#   0. wildcards (del nostro repository)
-#   1. ComfyUI/models/wildcards
-#   2. custom_nodes/wildcards
-#   3. comfyui-dynamicprompts/wildcards
-#   4. extra_model_pathsでwildcardsに設定されたディレクトリ
-#   5. ComfyUI-Impact-Pack/wildcards
-#   6. ComfyUI-Impact-Pack/impact-pack.iniで設定されたディレクトリ
-# -----------------------------------------------
+import folder_paths
+import numpy as np
+import yaml
+
+from . import paths
+
+
 def get_wildcard_dirs() -> List[str]:
-    """ワイルドカードファイルが格納されているディレクトリのリストを取得します。"""
-    dirs = []
-    
-    # 0. wildcards del nostro repository (priorità alta)
-    dirs.append(str(paths.wildcards_dir))
-
-    # 1. ComfyUI/models/wildcards (percorso standard ComfyUI)
-    dirs.append(str(paths.custom_nodes_dir.parent / "models" / "wildcards"))
-
-    # 2. comfyui-dynamicprompts wildcards
-    dirs.append(str(paths.custom_nodes_dir / "comfyui-dynamicprompts" / "wildcards"))
-
-    # 3. extra_model_paths.yaml で設定されたパス
+    dirs = [
+        paths.wildcards_dir,
+        paths.custom_nodes_dir.parent / "models" / "wildcards",
+        paths.custom_nodes_dir / "comfyui-dynamicprompts" / "wildcards",
+    ]
     try:
-        # `folder_paths.get_folder_paths` はリストを返す
-        dirs.extend(folder_paths.get_folder_paths("wildcards"))
+        dirs.extend(Path(path) for path in folder_paths.get_folder_paths("wildcards"))
     except Exception:
         pass
-    
-    # 4. ComfyUI-Impact-Pack/wildcards
-    dirs.append(str(paths.custom_nodes_dir / "ComfyUI-Impact-Pack" / "wildcards"))
-
-    # 5. ComfyUI-Impact-Pack/impact-pack.ini で設定されたパス
-    ini_file = paths.custom_nodes_dir / "ComfyUI-Impact-Pack" / "impact-pack.ini"
+    impact_dir = paths.custom_nodes_dir / "ComfyUI-Impact-Pack"
+    dirs.append(impact_dir / "wildcards")
+    ini_file = impact_dir / "impact-pack.ini"
     try:
         config = configparser.ConfigParser()
         config.read(ini_file, encoding="utf-8")
-        if "default" in config and "custom_wildcards" in config["default"]:
-            dirs.append(config["default"]["custom_wildcards"])
+        custom = config.get("default", "custom_wildcards", fallback="").strip()
+        if custom:
+            dirs.append(Path(custom).expanduser())
     except Exception:
         pass
 
-    # 存在するディレクトリのみをリストアップ
-    return [path for path in dirs if Path(path).exists()]
+    result = []
+    seen = set()
+    for directory in dirs:
+        resolved = str(Path(directory).expanduser().resolve())
+        if resolved not in seen and Path(resolved).is_dir():
+            seen.add(resolved)
+            result.append(resolved)
+    return result
 
 
 class WildcardLoader:
-    """
-    テキスト内のワイルドカード（例: `__animal__`）や選択オプション（例: `{cat|dog}`）を
-    解決・置換する機能を提供するクラス。
-    """
-    # --- クラス属性 & 定数 ---
     _wildcards: Dict[str, List[str]] = {}
-    _dirs: List[str] = get_wildcard_dirs()
+    _available: Dict[str, Path] = {}
+    _loaded: set[str] = set()
+    _dirs: List[str] = []
+    _on_demand = False
+    _lock = threading.RLock()
+    CACHE_LIMIT_BYTES = 50 * 1024 * 1024
 
-    # 正規表現パターン
     QUANTIFIER_RE = re.compile(r"(?P<quantifier>\d+)#__(?P<keyword>[\w.\-+/*\\]+?)__", re.IGNORECASE)
-    OPTION_RE = re.compile(r'(?<!\\)\{((?:[^{}]|(?<=\\)[{}])*?)(?<!\\)\}')
+    OPTION_RE = re.compile(r"(?<!\\)\{((?:[^{}]|(?<=\\)[{}])*?)(?<!\\)\}")
     WILDCARD_RE = re.compile(r"__([\w.\-+/*\\]+?)__")
-
-    # --- Public API ---
+    RANGE_RE = re.compile(r"^(?:(\d+)(?:-(\d*))?|-(\d+))$")
 
     @classmethod
     def load(cls, force: bool = False):
-        """
-        設定されたディレクトリからワイルドカードファイルを読み込みます。
-        
-        Args:
-            force (bool): Trueの場合、読み込み済みのキャッシュを破棄して再読み込みします。
-        """
-        if force:
-            cls.unload()
-        
-        if cls._wildcards:
-            return
+        with cls._lock:
+            if force:
+                cls.unload()
+            if cls._available or cls._wildcards:
+                return
+            cls._dirs = get_wildcard_dirs()
+            cls._on_demand = cls._calculate_size(cls._dirs, cls.CACHE_LIMIT_BYTES) >= cls.CACHE_LIMIT_BYTES
+            for directory in cls._dirs:
+                cls._scan_directory(Path(directory))
+            if not cls._on_demand:
+                for key in list(cls._available):
+                    cls._load_key(key)
 
-        for path_str in cls._dirs:
-            try:
-                cls._load_wildcards_from_directory(Path(path_str))
-            except Exception as e:
-                print(f"Failed to load wildcards from {path_str}: {e}")
+    @classmethod
+    def refresh(cls):
+        cls.load(force=True)
 
     @classmethod
     def unload(cls):
-        """読み込み済みのワイルドカードをすべてクリアします。"""
-        cls._wildcards = {}
-    
+        with cls._lock:
+            cls._wildcards = {}
+            cls._available = {}
+            cls._loaded = set()
+            cls._dirs = []
+            cls._on_demand = False
+
+    @classmethod
+    def get_status(cls) -> Dict[str, Any]:
+        cls.load()
+        with cls._lock:
+            return {
+                "on_demand_mode": cls._on_demand,
+                "total_available": len(set(cls._available) | set(cls._wildcards)),
+                "loaded_count": len(cls._loaded),
+            }
+
     @classmethod
     def get_wildcards_list(cls) -> List[str]:
-        """__name__形式のワイルドカード名のリストを返します。"""
-        return [f"__{key}__" for key in cls._wildcards.keys()]
-    
-    @classmethod
-    def get_wildcards_dict(cls) -> Dict[str, List[str]]:
-        """ワイルドカードの辞書（キー: 名前, 値: 候補リスト）を返します。"""
-        return cls._wildcards
+        cls.load()
+        with cls._lock:
+            return [f"__{key}__" for key in sorted(set(cls._available) | set(cls._wildcards))]
 
     @classmethod
-    def process(cls, text: str, seed: int) -> str:
-        """
-        入力テキスト内のワイルドカードと選択オプションを展開します。
-        
-        Args:
-            text (str): 処理対象のテキスト。
-            seed (int): 乱数生成のためのシード値。
-            
-        Returns:
-            str: 展開後のテキスト。
-        """
+    def get_loaded_wildcards_list(cls) -> List[str]:
+        cls.load()
+        with cls._lock:
+            return [f"__{key}__" for key in sorted(cls._loaded)]
+
+    @classmethod
+    def get_wildcards_dict(cls, load_all: bool = True) -> Dict[str, List[str]]:
+        cls.load()
+        with cls._lock:
+            if load_all:
+                for key in list(cls._available):
+                    cls._load_key(key)
+            return cls._wildcards
+
+    @classmethod
+    def get_wildcard_value(cls, keyword: str) -> Optional[List[str]]:
+        cls.load()
+        key = cls._key_normalize(keyword)
+        with cls._lock:
+            value = cls._load_key(key)
+            if value is not None:
+                return value
+            matches = cls._matching_keys(key)
+            if not matches:
+                return None
+            options = []
+            for matched_key in matches:
+                options.extend(cls._load_key(matched_key) or [])
+            return options or None
+
+    @classmethod
+    def process(cls, text: str, seed: Optional[int] = None, usage: Optional[Dict[str, Dict[str, int]]] = None,
+                downvote_factor: float = 1.0) -> str:
         if not text:
             return ""
-
+        cls.load()
         text = cls._remove_comments(text)
         random_gen = np.random.default_rng(seed)
-        
-        # ネストされたワイルドカードやオプションを解決するため、置換がなくなるまでループ
-        # 無限ループを避けるために最大深度を設定
         for _ in range(100):
-            original_text = text
-            
-            # 数量子（例: 3#__animal__）を {__animal__|__animal__|__animal__} 形式に展開
-            text = cls._handle_quantifiers(text)
-            
-            # 選択オプション（例: {cat|dog}）を置換
-            text = cls._replace_all_options(text, random_gen)
-
-            # ワイルドカード（例: __animal__）を置換
-            text = cls._replace_all_wildcards(text, random_gen)
-
-            # テキストに変化がなければループを終了
-            if text == original_text:
+            original = text
+            text = cls.QUANTIFIER_RE.sub(
+                lambda match: " ".join(f"__{match.group('keyword')}__" for _ in range(int(match.group('quantifier')))),
+                text,
+            )
+            while True:
+                text, count = cls.OPTION_RE.subn(
+                    lambda match: cls._process_option_group(match, random_gen, usage, downvote_factor), text
+                )
+                if not count:
+                    break
+            text, wildcard_count = cls._replace_wildcards(text, random_gen, usage, downvote_factor)
+            if not wildcard_count and text == original:
                 break
-        
-        return text
-
-    # --- ファイル読み込み関連のメソッド ---
+        return text.replace(r"\{", "{").replace(r"\}", "}")
 
     @classmethod
-    def _load_wildcards_from_directory(cls, dir_path: Path):
-        """指定されたディレクトリからワイルドカードファイルを再帰的に読み込みます。"""
-        for root, _, files in os.walk(dir_path, followlinks=True):
-            root_path = Path(root)
-            for file in files:
-                file_path = root_path / file
-                
-                if file_path.suffix == ".txt":
-                    rel_path = file_path.relative_to(dir_path)
-                    key = cls._key_normalize(str(rel_path.with_suffix('')))
-                    
-                    if key not in cls._wildcards:
-                        lines = cls._read_text_file(file_path)
-                        # コメント行（#で始まる行）を除外
-                        cls._wildcards[key] = [line for line in lines if not line.strip().startswith("#")]
+    def _scan_directory(cls, directory: Path):
+        for root, dirnames, filenames in os.walk(directory, followlinks=True):
+            dirnames.sort()
+            for filename in sorted(filenames):
+                file_path = Path(root) / filename
+                suffix = file_path.suffix.lower()
+                if suffix not in {".txt", ".yaml", ".yml"}:
+                    continue
+                key = cls._key_normalize(str(file_path.relative_to(directory).with_suffix("")))
+                if suffix == ".txt":
+                    cls._available.setdefault(key, file_path)
+                else:
+                    cls._load_yaml_file(file_path)
 
-                elif file_path.suffix in [".yml", ".yaml"]:
-                    yaml_data = cls._read_yaml_file(file_path)
-                    if yaml_data:
-                        cls._parse_yaml_data(yaml_data)
+    @classmethod
+    def _load_key(cls, key: str) -> Optional[List[str]]:
+        if key in cls._wildcards:
+            return cls._wildcards[key]
+        file_path = cls._available.get(key)
+        if file_path is None:
+            return None
+        values = cls._read_text_file(file_path)
+        cls._wildcards[key] = values
+        cls._loaded.add(key)
+        return values
+
+    @classmethod
+    def _load_yaml_file(cls, file_path: Path):
+        data = cls._read_yaml_file(file_path)
+        if data is not None:
+            cls._parse_yaml_data(data)
 
     @classmethod
     def _parse_yaml_data(cls, data: Any, prefix: str = ""):
-        """YAMLファイルから読み込んだデータを再帰的に処理し、ワイルドカード辞書に登録します。"""
         if isinstance(data, dict):
             for key, value in data.items():
-                new_prefix = f"{prefix}/{key}" if prefix else key
-                cls._parse_yaml_data(value, new_prefix)
-        elif isinstance(data, list):
-            normalized_key = cls._key_normalize(prefix)
-            cls._wildcards[normalized_key] = [str(item) for item in data]
-        elif isinstance(data, (str, int, float)):
-            normalized_key = cls._key_normalize(prefix)
-            cls._wildcards[normalized_key] = [str(data)]
+                cls._parse_yaml_data(value, f"{prefix}/{key}" if prefix else str(key))
+        elif isinstance(data, list) and prefix:
+            key = cls._key_normalize(prefix)
+            if key not in cls._wildcards and key not in cls._available:
+                cls._wildcards[key] = [str(item) for item in data]
+                cls._loaded.add(key)
+        elif isinstance(data, (str, int, float)) and prefix:
+            key = cls._key_normalize(prefix)
+            if key not in cls._wildcards and key not in cls._available:
+                cls._wildcards[key] = [str(data)]
+                cls._loaded.add(key)
 
     @staticmethod
     def _read_text_file(file_path: Path) -> List[str]:
-        """テキストファイルを読み込み、行のリストとして返します。UTF-8で失敗した場合、ISO-8859-1を試します。"""
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                return f.read().splitlines()
-        except UnicodeDecodeError:
-            with open(file_path, "r", encoding="ISO-8859-1") as f:
-                return f.read().splitlines()
+        for encoding in ("utf-8", "ISO-8859-1"):
+            try:
+                lines = file_path.read_text(encoding=encoding).splitlines()
+                return [line.strip() for line in lines if line.strip() and not line.strip().startswith("#")]
+            except UnicodeDecodeError:
+                continue
+        return []
 
     @staticmethod
-    def _read_yaml_file(file_path: Path) -> Optional[Dict]:
-        """YAMLファイルを読み込み、辞書として返します。エンコーディングフォールバックにも対応します。"""
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                return yaml.safe_load(f)
-        except (UnicodeDecodeError, yaml.YAMLError):
+    def _read_yaml_file(file_path: Path) -> Any:
+        for encoding in ("utf-8", "ISO-8859-1"):
             try:
-                with open(file_path, "r", encoding="ISO-8859-1") as f:
-                    return yaml.safe_load(f)
-            except Exception as e:
-                print(f"Failed to read YAML file {file_path}: {e}")
-                return None
-
-    # --- テキスト処理のコアメソッド ---
-
-    @classmethod
-    def _handle_quantifiers(cls, text: str) -> str:
-        """ `N#__keyword__` 形式の数量子構文を展開します。"""
-        for match in cls.QUANTIFIER_RE.finditer(text):
-            parts = match.groupdict()
-            count = int(parts.get('quantifier') or 1)
-            keyword = parts.get('keyword', '')
-            
-            # `__keyword__|__keyword__|...` のような文字列に置換
-            replacement = '__|__'.join([keyword] * count)
-            
-            # `*` などの特殊文字をエスケープして、正確な置換を行う
-            keyword_re = keyword.replace('*', r'\*').replace('+', r'\+')
-            temp_re = re.compile(fr"\d+#__{keyword_re}__", re.IGNORECASE)
-            text = temp_re.sub(f"__{replacement}__", text, 1)
-            
-        return text
-
-    @classmethod
-    def _replace_all_options(cls, text: str, random_gen: np.random.Generator) -> str:
-        """テキスト内のすべての選択オプション `{...}` を置換します。"""
-        # 複数回の置換が必要な場合があるためループ処理
-        while True:
-            new_text, replacements_found = cls.OPTION_RE.subn(
-                lambda m: cls._process_option_group(m, random_gen), text
-            )
-            if not replacements_found:
-                break
-            text = new_text
-        return text
-    
-    @classmethod
-    def _replace_all_wildcards(cls, text: str, random_gen: np.random.Generator) -> str:
-        """テキスト内のすべてのワイルドカード `__...__` を置換します。"""
-        matches = list(cls.WILDCARD_RE.finditer(text))
-        
-        for match in matches:
-            wildcard_str = match.group(0) # `__keyword__`
-            keyword = cls._key_normalize(match.group(1)) # `keyword`
-            
-            options = []
-            
-            # 1. 通常のワイルドカード
-            if keyword in cls._wildcards:
-                options = cls._wildcards[keyword]
-            # 2. Globパターン (`*`) を含むワイルドカード
-            elif '*' in keyword:
-                try:
-                    glob_re = re.compile(keyword.replace('*', '.*').replace('+', r'\+'))
-                    for k, v in cls._wildcards.items():
-                        if glob_re.fullmatch(k):
-                            options.extend(v)
-                except re.error:
-                    pass # 無効な正規表現パターンは無視
-            # 3. フォールバック (`/` がない場合、 `*/keyword` として再検索)
-            elif '/' not in keyword:
-                fallback_wildcard = f"__*/{keyword}__"
-                # `text` 全体を渡すのではなく、現在のワイルドカード部分のみを再帰的に処理
-                replacement = cls._replace_all_wildcards(fallback_wildcard, random_gen)
-                text = text.replace(wildcard_str, replacement, 1)
+                return yaml.safe_load(file_path.read_text(encoding=encoding))
+            except UnicodeDecodeError:
                 continue
+            except yaml.YAMLError as error:
+                print(f"Failed to read YAML file {file_path}: {error}")
+                return None
+        return None
 
-            if options:
-                # 確率をパースして選択
-                probabilities, clean_options = cls._parse_probabilities(options)
-                selected_item = random_gen.choice(clean_options, p=probabilities)
-                text = text.replace(wildcard_str, str(selected_item), 1)
-
-        return text
+    @staticmethod
+    def _calculate_size(directories: List[str], limit: int) -> int:
+        total = 0
+        for directory in directories:
+            for root, _, filenames in os.walk(directory, followlinks=True):
+                for filename in filenames:
+                    if Path(filename).suffix.lower() in {".txt", ".yaml", ".yml"}:
+                        try:
+                            total += (Path(root) / filename).stat().st_size
+                        except OSError:
+                            pass
+                        if total >= limit:
+                            return total
+        return total
 
     @classmethod
-    def _process_option_group(cls, match: re.Match, random_gen: np.random.Generator) -> str:
-        """単一の選択グループ `{...}` を処理します。"""
-        content = match.group(1)
-        options = content.split('|')
-        
-        # 複数選択構文（例: `2-4$$__colors__`）の解析
-        select_range_str, separator, remaining_options_str = cls._parse_multi_select_syntax(options[0])
-        
-        if select_range_str:
-            # 範囲指定がある場合は、オプションを再構築
-            options = remaining_options_str.split('|') if remaining_options_str else []
-            # オプションがワイルドカード形式の場合、展開する
-            if len(options) == 1 and cls.WILDCARD_RE.search(options[0]):
-                options = cls._get_options_from_wildcard_str(options[0])
-        
+    def _matching_keys(cls, pattern: str) -> List[str]:
+        keys = sorted(set(cls._available) | set(cls._wildcards))
+        if "*" in pattern:
+            return [key for key in keys if fnmatch.fnmatchcase(key, pattern)]
+        if "/" not in pattern:
+            return [key for key in keys if key == pattern or key.endswith(f"/{pattern}") or
+                    key.startswith(f"{pattern}/") or f"/{pattern}/" in key]
+        return []
+
+    @classmethod
+    def _replace_wildcards(cls, text: str, random_gen: np.random.Generator,
+                           usage: Optional[Dict[str, Dict[str, int]]], factor: float) -> Tuple[str, int]:
+        replacements = 0
+        for match in list(cls.WILDCARD_RE.finditer(text)):
+            raw = match.group(0)
+            key = cls._key_normalize(match.group(1))
+            options = cls.get_wildcard_value(key)
+            if not options:
+                continue
+            replacement = cls._choose(options, key, random_gen, usage, factor)
+            text = text.replace(raw, replacement, 1)
+            replacements += 1
+        return text, replacements
+
+    @classmethod
+    def _process_option_group(cls, match: re.Match, random_gen: np.random.Generator,
+                              usage: Optional[Dict[str, Dict[str, int]]], factor: float) -> str:
+        options = match.group(1).split("|")
+        select_range = None
+        separator = " "
+        parts = options[0].split("$$")
+        if len(parts) in (2, 3):
+            select_range = cls._parse_range(parts[0].strip())
+            if select_range is not None:
+                separator = parts[1] if len(parts) == 3 else " "
+                source = parts[-1]
+                wildcard_matches = cls.WILDCARD_RE.findall(source)
+                if len(options) == 1 and wildcard_matches:
+                    options = []
+                    for wildcard in wildcard_matches:
+                        options.extend(cls.get_wildcard_value(wildcard) or [])
+                else:
+                    options[0] = source
         if not options:
             return ""
+        count = 1 if select_range is None else cls._select_count(select_range, len(options), random_gen)
+        if count <= 0:
+            return ""
+        selected = cls._choose_many(options, "__options__", count, random_gen, usage, factor)
+        return separator.join(selected)
 
-        # 選択数の決定
-        select_count = cls._determine_select_count(select_range_str, len(options), random_gen)
-        
-        # 確率の解析
-        probabilities, clean_options = cls._parse_probabilities(options)
+    @classmethod
+    def _choose(cls, options: List[str], key: str, random_gen: np.random.Generator,
+                usage: Optional[Dict[str, Dict[str, int]]], factor: float) -> str:
+        return cls._choose_many(options, key, 1, random_gen, usage, factor)[0]
 
-        # 置換アイテムの選択
-        if select_count > len(clean_options):
-             # 選択数より候補が少ない場合は、候補をシャッフルしてすべて使用
-            random_gen.shuffle(clean_options)
-            selected_items = clean_options
-        else:
-            selected_items = random_gen.choice(
-                clean_options, 
-                size=select_count, 
-                replace=False, 
-                p=probabilities
-            )
-        
-        return separator.join(map(str, selected_items))
-
-    # --- ユーティリティ & ヘルパーメソッド ---
-
-    @staticmethod
-    def _key_normalize(text: str) -> str:
-        """ワイルドカードのキーを正規化します（小文字化、バックスラッシュをスラッシュに、スペースをハイフンに）。"""
-        return text.replace("\\", "/").replace(" ", "-").lower()
-        
-    @staticmethod
-    def _is_numeric(text: str) -> bool:
-        """文字列が数値（整数または浮動小数点数）かどうかを判定します。"""
-        return re.match(r'^-?(\d*\.?\d+|\d+\.?\d*)$', text) is not None
+    @classmethod
+    def _choose_many(cls, options: List[str], key: str, count: int, random_gen: np.random.Generator,
+                     usage: Optional[Dict[str, Dict[str, int]]], factor: float) -> List[str]:
+        weights, clean = cls._parse_probabilities(options)
+        if usage is not None and factor < 1.0:
+            counts = usage.get(key, {})
+            weights = [weight * factor ** counts.get(value.strip(), 0) for weight, value in zip(weights, clean)]
+        total = sum(weights)
+        probabilities = None if total <= 0 else np.asarray(weights, dtype=float) / total
+        count = min(count, len(clean))
+        indices = np.atleast_1d(random_gen.choice(len(clean), size=count, replace=False, p=probabilities))
+        selected = [clean[int(index)] for index in indices]
+        if usage is not None:
+            bucket = usage.setdefault(key, {})
+            for value in selected:
+                normalized = value.strip()
+                bucket[normalized] = bucket.get(normalized, 0) + 1
+        return selected
 
     @classmethod
     def _parse_probabilities(cls, options: List[str]) -> Tuple[List[float], List[str]]:
-        """
-        オプションリストから `確率::値` 形式を解析します。
-        
-        Returns:
-            (正規化された確率のリスト, 確率部分を取り除いた値のリスト)
-        """
-        probabilities = []
-        clean_options = []
-        
+        weights = []
+        clean = []
         for option in options:
-            option_str = str(option)
-            parts = option_str.split("::", 1)
-            
-            weight = 1.0
-            value = option_str
-            
+            value = str(option)
+            parts = value.split("::", 1)
             if len(parts) == 2 and cls._is_numeric(parts[0].strip()):
-                weight = float(parts[0].strip())
+                weight = max(0.0, float(parts[0].strip()))
                 value = parts[1]
-            
-            probabilities.append(weight)
-            clean_options.append(value)
-            
-        total_weight = sum(probabilities)
-        if total_weight == 0:
-            # 全ての重みが0の場合は均等確率にする
-            num_options = len(options)
-            normalized_probs = [1.0 / num_options] * num_options if num_options > 0 else []
-        else:
-            normalized_probs = [w / total_weight for w in probabilities]
-            
-        return normalized_probs, clean_options
+            else:
+                weight = 1.0
+            weights.append(weight)
+            clean.append(value)
+        if weights and sum(weights) <= 0:
+            weights = [1.0] * len(weights)
+        return weights, clean
+
+    @classmethod
+    def _parse_range(cls, value: str) -> Optional[Tuple[int, int]]:
+        match = cls.RANGE_RE.fullmatch(value)
+        if not match:
+            return None
+        if match.group(3) is not None:
+            return 1, int(match.group(3))
+        minimum = int(match.group(1))
+        maximum = int(match.group(2)) if match.group(2) else minimum
+        return minimum, maximum
 
     @staticmethod
-    def _parse_multi_select_syntax(option_str: str) -> Tuple[str, str, str]:
-        """`範囲$$区切り文字$$オプション` の構文を解析します。"""
-        if "$$" not in option_str:
-            return "", " ", "" # デフォルト値
-
-        parts = option_str.split("$$")
-        if len(parts) == 2:
-            return parts[0], " ", parts[1] # `範囲$$オプション`
-        elif len(parts) == 3:
-            return parts[0], parts[1], parts[2] # `範囲$$区切り文字$$オプション`
-        
-        return "", " ", option_str # 不正な形式
-
-    @classmethod
-    def _determine_select_count(cls, range_str: str, num_options: int, random_gen: np.random.Generator) -> int:
-        """範囲文字列（例: `1-3`, `2`）から実際に選択する数を決定します。"""
-        if not range_str:
-            return 1 # 範囲指定なしの場合は1つ選択
-
-        min_val, max_val = 1, 1
-        
-        range_match = re.match(r'(\d+)-(\d+)', range_str)
-        if range_match:
-            min_val = int(range_match.group(1))
-            max_val = int(range_match.group(2))
-        elif cls._is_numeric(range_str):
-            min_val = max_val = int(range_str)
-        
-        # 実際の選択範囲を候補数に合わせる
-        low = min(min_val, max_val)
-        high = min(max(min_val, max_val), num_options)
-        
+    def _select_count(select_range: Tuple[int, int], option_count: int,
+                      random_gen: np.random.Generator) -> int:
+        low, high = sorted(select_range)
+        low = min(max(0, low), option_count)
+        high = min(max(0, high), option_count)
         if low >= high:
-            return high
-        return random_gen.integers(low, high + 1)
+            return low
+        return int(random_gen.integers(low, high + 1))
 
-    @classmethod
-    def _get_options_from_wildcard_str(cls, wildcard_str: str) -> List[str]:
-        """`__*color__`のような文字列からワイルドカードを展開して候補リストを返します。"""
-        options = []
-        matches = cls.WILDCARD_RE.findall(wildcard_str)
-        
-        for match in matches:
-            keyword = cls._key_normalize(match)
-            if keyword in cls._wildcards:
-                options.extend(cls._wildcards[keyword])
-            elif '*' in keyword:
-                try:
-                    glob_re = re.compile(keyword.replace('*', '.*').replace('+', r'\+'))
-                    for k, v in cls._wildcards.items():
-                        if glob_re.fullmatch(k):
-                            options.extend(v)
-                except re.error:
-                    pass
-        return options
+    @staticmethod
+    def _key_normalize(text: str) -> str:
+        return text.replace("\\", "/").replace(" ", "-").lower()
+
+    @staticmethod
+    def _is_numeric(text: str) -> bool:
+        try:
+            return math.isfinite(float(text))
+        except ValueError:
+            return False
 
     @staticmethod
     def _remove_comments(text: str) -> str:
-        """
-        テキストからコメント行を削除します。
-        特殊仕様: コメント行の直後の行は、その前の有効な行に連結されます。
-        """
-        lines = text.split("\n")
-        processed_lines = []
-        previous_line_was_comment = False
-
-        for line in lines:
-            if line.strip().startswith("#"):
-                previous_line_was_comment = True
-                continue
-            
-            if not processed_lines:
-                processed_lines.append(line)
-            elif previous_line_was_comment:
-                # 前の行がコメントだった場合、現在の行を前の行に連結
-                processed_lines[-1] += ' ' + line
-                previous_line_was_comment = False
-            else:
-                processed_lines.append(line)
-        
-        return "\n".join(processed_lines)
+        return "\n".join(line for line in text.splitlines() if not line.lstrip().startswith("#"))

@@ -423,7 +423,7 @@ export class TagCompleter {
                 const afterCursor = this.helper.getAfterCursor();
                 
                 // Cerca la wildcard che abbiamo appena inserito
-                const wildcardMatch = beforeCursor.match(/__([^_]+)__/);
+                const wildcardMatch = beforeCursor.match(/__([\w.\-+/*\\]+?)__/);
                 if (wildcardMatch) {
                     const wildcardText = wildcardMatch[0];
                     const startPos = beforeCursor.lastIndexOf(wildcardText);
@@ -474,14 +474,6 @@ export class TagCompleter {
 
         const position = this.helper.getCursorOffset();
         this.dropdownController.show(items, position);
-    }
-
-    // --- 選択中のアイテムを挿入 ---
-    insertSelectedItem() {
-        const selectedItem = this.dropdownController.getSelectedItem();
-        if (!selectedItem) return;
-
-        selectedItem.click();
     }
 
     

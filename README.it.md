@@ -45,9 +45,12 @@ La caratteristica di spicco è il **sistema di selezione opzioni wildcard** - di
 - **🧠 Processing Avanzato Wildcard**: Processa prompt complessi con wildcard nel formato `__keyword__`
 - **🎲 Opzioni Dinamiche**: Supporto per scelte multiple `{opzione1|opzione2|opzione3}`
 - **📊 Randomizzazione Pesata**: Selezione basata su probabilità con sintassi `peso::opzione`
-- **🔢 Quantificatori**: Seleziona più elementi con sintassi `numero__keyword__`
-- **🎭 Separatori Personalizzati**: Controllo della formattazione output con separatori personalizzati
+- **🔢 Quantificatori**: Espande più istanze con sintassi `numero#__keyword__`
+- **🎭 Selezione Multipla e Separatori**: Usa `{2$$, $$a|b|c}` o `{2-4$$; $$__wildcard__}`
 - **🌱 Risultati Riproducibili**: Randomizzazione basata su seed per output consistenti
+- **🔄 Modalità stile Impact**: `populate`, `fixed` e `reproduce`, mantenendo i workflow legacy
+- **⚡ Cache Scalabile**: Caricamento automatico completo oppure on-demand, refresh e stato cache
+- **🧠 Downvote di Sessione**: Riduce opzionalmente le ripetizioni senza eliminare le scelte
 
 ### 📝 Esempi di Utilizzo
 
@@ -71,14 +74,14 @@ Output: Crea un'immagine ritratto (66% probabilità) o paesaggio (33% probabilit
 
 #### Quantificatori
 ```
-Input: 3__colore__ fiori in un __contenitore__
+Input: 3#__colore__ fiori in un __contenitore__
 Output: fiori rossi gialli blu in un vaso
 ```
 
 #### Separatori Personalizzati
 ```
-Input: {mela$$, $$arancia$$, $$banana$$}__frutto__
-Output: frutta mela, arancia, banana
+Input: {2$$, $$mela|arancia|banana} frutti
+Output: mela, arancia frutti
 ```
 
 ### 🔧 Input del Nodo

@@ -3,6 +3,11 @@ import { ComfyWidgets } from "../../scripts/widgets.js";
 import { mk_name, findTextareaFromWidget } from "./utils.js";
 import { settings } from "./settings.js";
 import { TagCompleter } from "./completer/tag_completer.js";
+import {
+    enhanceWildcardProcessorNode,
+    installQueueHook,
+    buildWildcardNodeMenuItems,
+} from "./wildcard_processor.js";
 
 // ==============================================
 // STRINGウィジェットのハイジャック
@@ -55,6 +60,7 @@ const extension = {
     // ------------------------------------------
     init: async function(app) {
         hijackSTRING();
+        installQueueHook(app);
     },
 
     // ------------------------------------------
@@ -104,6 +110,13 @@ const extension = {
                     updateVisibility();
                 }
 
+                // Add the new wildcard toolbar and cache status label.
+                try {
+                    enhanceWildcardProcessorNode(this);
+                } catch (error) {
+                    console.warn("[TagComplete] Failed to enhance WildcardProcessor node:", error);
+                }
+
                 return r;
             };
 
@@ -116,6 +129,7 @@ const extension = {
                     const widget = this.widgets.find(w => w.name === "preview");
                     if (widget) {
                         widget.value = text;
+                        if (widget.inputEl) widget.inputEl.value = text;
                     }
 
                     // In modalità populate, salva il testo popolato in populated_text
@@ -128,7 +142,14 @@ const extension = {
                 }
             };
         }
-    }
+    },
+
+    getNodeMenuItems: function(node) {
+        if (node.comfyClass === "WildcardProcessor" || node.type === "WildcardProcessor") {
+            return buildWildcardNodeMenuItems(node);
+        }
+        return [];
+    },
 };
 
 // Load settings before registering so the settings panel is populated.

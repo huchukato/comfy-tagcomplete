@@ -1,5 +1,7 @@
 from .utils import Endpoint
 from .tagdata_manager import TagDataManager
+from .wildcards import WildcardLoader
+from .wildcard_processor import WildcardProcessorNode
 from . import paths
 
 from aiohttp import web
@@ -120,6 +122,46 @@ async def load_wildcard(req: web.Request):
     TagDataManager.load_wildcards()
 
     return web.json_response({"status": "success"})
+
+
+@Endpoint.get("tagcomplete/wildcards/list")
+async def wildcard_list(req: web.Request):
+    return web.json_response(WildcardLoader.get_wildcards_list())
+
+
+@Endpoint.get("tagcomplete/wildcards/status")
+async def wildcard_status(req: web.Request):
+    status = WildcardLoader.get_status()
+    return web.json_response({**status, "count": status["total_available"], "ready": True})
+
+
+@Endpoint.post("tagcomplete/wildcards/process")
+async def wildcard_process(req: web.Request):
+    data = await req.json()
+    text = data.get("text", "")
+    if not isinstance(text, str):
+        return web.json_response({"error": "text must be a string"}, status=400)
+    try:
+        seed = int(data.get("seed", 0))
+        factor = float(data.get("downvote_factor", 0.5))
+    except (TypeError, ValueError):
+        return web.json_response({"error": "seed and downvote_factor must be numeric"}, status=400)
+    if not 0.0 < factor <= 1.0:
+        return web.json_response({"error": "downvote_factor must be greater than 0 and at most 1"}, status=400)
+    if seed == 0:
+        import secrets
+        seed = secrets.randbits(64)
+    usage = WildcardProcessorNode._session_usage if data.get("deduplicate", True) and factor < 1.0 else None
+    processed = WildcardLoader.process(text, seed, usage, factor)
+    return web.json_response({"processed_text": processed, "text": processed, "seed": seed})
+
+
+@Endpoint.post("tagcomplete/wildcards/refresh")
+async def wildcard_refresh(req: web.Request):
+    WildcardLoader.refresh()
+    if TagDataManager.enable and TagDataManager.enable_wildcards:
+        TagDataManager.load_wildcards(refresh_loader=False)
+    return web.json_response({"status": "success", **WildcardLoader.get_status()})
 
 
 # --- Suggestion Count設定 --- 

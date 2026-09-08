@@ -53,9 +53,12 @@ The standout feature is the **wildcard sub-selection system** - type `__`, selec
 - **🧠 Advanced Wildcard Processing**: Process complex prompts with wildcards in the format `__keyword__`
 - **🎲 Dynamic Options**: Support for multiple choice options `{option1|option2|option3}`
 - **📊 Weighted Randomization**: Probability-based selection with syntax `weight::option`
-- **🔢 Quantifiers**: Select multiple items with syntax `count__keyword__`
-- **🎭 Custom Separators**: Control output formatting with custom separators
+- **🔢 Quantifiers**: Expand multiple wildcard instances with syntax `count#__keyword__`
+- **🎭 Multi-Select & Separators**: Use `{2$$, $$a|b|c}` or `{2-4$$; $$__wildcard__}`
 - **🌱 Reproducible Results**: Seed-based randomization for consistent outputs
+- **🔄 Impact-Style Modes**: `populate`, `fixed`, and one-shot `reproduce`, while preserving legacy workflows
+- **⚡ Scalable Cache**: Automatic full-cache or on-demand loading with refresh and status controls
+- **🧠 Session Downvote**: Optionally reduces repeats without removing choices
 
 ### 📝 Usage Examples
 
@@ -79,14 +82,14 @@ Output: Create a portrait image (66% chance) or landscape image (33% chance)
 
 #### Quantifiers
 ```
-Input: 3__color__ flowers in a __container__
+Input: 3#__color__ flowers in a __container__
 Output: red yellow blue flowers in a vase
 ```
 
 #### Custom Separators
 ```
-Input: {apple$$, $$orange$$, $$banana$$}__fruit__
-Output: apple, orange, banana fruits
+Input: {2$$, $$apple|orange|banana} fruits
+Output: apple, orange fruits
 ```
 
 ### 🔧 Node Inputs

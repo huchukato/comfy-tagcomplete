@@ -234,12 +234,13 @@ class TagDataManager:
     # Wildcards
     # -------------------------------------------
     @classmethod
-    def load_wildcards(cls):
+    def load_wildcards(cls, refresh_loader=True):
         if not cls.conn:
             cls.init_db()
         
         cls.clear_data_by_table("wildcards")
-        WildcardLoader.unload()
+        if refresh_loader:
+            WildcardLoader.refresh()
 
         if not cls.enable: return
         if not cls.enable_wildcards: return
@@ -248,8 +249,6 @@ class TagDataManager:
         data = cls.parse_wildcards()
 
         cls.insert_data_to_table(data, "wildcards")
-
-        WildcardLoader.unload()
     
 
     # -------------------------------------------
