@@ -5,7 +5,7 @@ from comfy.comfy_types import IO
 import sys
 
 author = "jupo"
-packageName = "ExTagComplete"
+packageName = "TagForge"
 
 
 # ===============================================

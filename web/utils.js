@@ -1,7 +1,7 @@
 import { api } from "../../scripts/api.js";
 
 const author = "jupo";
-const packageName = "ExTagComplete";
+const packageName = "TagForge";
 
 export function mk_name(name) {
     return `${author}.${packageName}.${name}`;

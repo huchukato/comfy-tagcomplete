@@ -32,7 +32,7 @@ class WildcardProcessorNode:
     RETURN_TYPES = (IO.STRING,)
     RETURN_NAMES = ("processed_text",)
     FUNCTION = "process_wildcards"
-    CATEGORY = "ComfyUI-TagComplete"
+    CATEGORY = "TagForge"
 
     def process_wildcards(self, text, seed=0, populated_text="", mode="populate",
                           deduplicate=True, downvote_factor=0.5, **kwargs):
