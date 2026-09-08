@@ -522,10 +522,5 @@ export function installQueueHook(appRef) {
 export function enhanceWildcardProcessorNode(node) {
     if (node?.__tagforge_enhanced) return;
     node.__tagforge_enhanced = true;
-
-    try {
-        createWildcardToolbar(node);
-    } catch (error) {
-        console.warn("[TagForge] Failed to create wildcard toolbar:", error);
-    }
+    // Toolbar removed — wildcard insertion is handled by tag autocomplete.
 }

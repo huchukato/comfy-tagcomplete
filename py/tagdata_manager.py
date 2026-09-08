@@ -397,10 +397,10 @@ class TagDataManager:
     def search(cls, term: str, category: list[str] = None):
         if not cls.enable or cls.conn is None: return []
 
-        # Per le wildcards: se il termine inizia con __, rimuovi i delimitatori
-        # e cerca solo il contenuto. Così __viewan trova __pmp/prmpt/imgcmpstn/viewangle__
-        # senza dover ricordare il percorso completo.
+        # For wildcards: strip __ delimiters so a search like __shot finds
+        # __pmp/prmpt/imgcmp/shots__ by matching the leaf name.
         search_term = term
+        is_wildcard_search = search_term.startswith('__')
         if search_term.startswith('__'):
             search_term = search_term[2:]
         if search_term.endswith('__') and len(search_term) > 2:
@@ -436,32 +436,53 @@ class TagDataManager:
         union_query = ' UNION ALL '.join(union_queries)
         
         # サブクエリとしてラップしてORDER BY
-        query = f'''
-        SELECT * FROM ({union_query})
-        ORDER BY 
-            CASE 
-                WHEN postCount GLOB '[0-9]*' THEN CAST(postCount AS INTEGER)
-                ELSE -1
-            END DESC,
-            CASE 
-                WHEN postCount GLOB '[0-9]*' THEN ''
-                ELSE postCount
-            END ASC,
-            term ASC
-        '''
+        # For wildcard searches, prioritize matches on the leaf name (after last /)
+        if is_wildcard_search:
+            query = f'''
+            SELECT * FROM ({union_query})
+            ORDER BY
+                CASE
+                    WHEN categoryName = 'Wildcard' AND term LIKE '%/' || ? || '%' ESCAPE '\\' THEN 0
+                    WHEN categoryName = 'Wildcard' THEN 1
+                    ELSE 2
+                END ASC,
+                CASE
+                    WHEN postCount GLOB '[0-9]*' THEN CAST(postCount AS INTEGER)
+                    ELSE -1
+                END DESC,
+                term ASC
+            '''
+            # Add the leaf-match parameter for each table in the union
+            leaf_params = [escaped_term]
+        else:
+            query = f'''
+            SELECT * FROM ({union_query})
+            ORDER BY
+                CASE
+                    WHEN postCount GLOB '[0-9]*' THEN CAST(postCount AS INTEGER)
+                    ELSE -1
+                END DESC,
+                CASE
+                    WHEN postCount GLOB '[0-9]*' THEN ''
+                    ELSE postCount
+                END ASC,
+                term ASC
+            '''
+            leaf_params = []
         
         # 取得数制限
         if cls.max_count is not None and cls.max_count > 0:
             query += f" LIMIT ?"
-            # UNIONの場合、パラメータを各テーブル分準備
             all_params = []
             for _ in cls.tables:
                 all_params.extend(params)
+            all_params.extend(leaf_params)
             all_params.append(cls.max_count)
         else:
             all_params = []
             for _ in cls.tables:
                 all_params.extend(params)
+            all_params.extend(leaf_params)
         
         cursor = cls.conn.execute(query, all_params)
         results = []
